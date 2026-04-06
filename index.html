@@ -7,204 +7,237 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #F5F2EC;
-    --card: #FDFBF7;
-    --ink: #1A1814;
-    --muted: #8A8680;
-    --accent: #C84B2F;
-    --accent-light: #F5DDD8;
-    --done: #B0ADA8;
-    --border: #E2DED6;
-    --shadow: 0 2px 12px rgba(26,24,20,0.08);
+    --bg: #F5F2EC; --card: #FDFBF7; --ink: #1A1814; --muted: #8A8680;
+    --accent: #C84B2F; --accent-light: #F5DDD8; --done: #B0ADA8;
+    --border: #E2DED6; --shadow: 0 2px 12px rgba(26,24,20,0.08);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    min-height: 100vh;
-    padding: 0 0 6rem;
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; padding: 0 0 6rem; }
+
+  #login-screen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; align-items: center; justify-content: center; z-index: 200; padding: 2rem;
   }
+  #login-screen.hidden { display: none; }
+  .login-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 2rem 1.8rem; width: 100%; max-width: 360px; box-shadow: var(--shadow);
+  }
+  .login-card h2 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; font-weight: 400; margin-bottom: 0.3rem; }
+  .login-card p { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.5; }
+  .login-card label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
+  .login-card input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.7rem 0.9rem; margin-bottom: 1rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none;
+  }
+  .login-card input:focus { border-color: var(--ink); }
+  .login-card button {
+    width: 100%; background: var(--ink); color: white; border: none; border-radius: 10px;
+    padding: 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer;
+  }
+  .login-card button:active { background: #333; }
+  #login-error { color: var(--accent); font-size: 0.82rem; margin-top: 0.6rem; text-align: center; display: none; }
+  #login-loading { color: var(--muted); font-size: 0.82rem; margin-top: 0.6rem; text-align: center; display: none; }
+
+  #app-screen { display: none; }
+  #app-screen.visible { display: block; }
+
   header {
-    background: var(--ink);
-    color: white;
-    padding: 1.4rem 1.5rem 1.2rem;
+    background: var(--ink); color: white; padding: 1.2rem 1.5rem;
     position: sticky; top: 0; z-index: 10;
     display: flex; align-items: center; justify-content: space-between;
   }
-  header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.4rem; font-weight: 400;
-  }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; font-weight: 400; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  #user-badge { font-size: 0.78rem; color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.1); padding: 0.3rem 0.7rem; border-radius: 12px; }
   #share-btn {
-    background: var(--accent); color: white;
-    border: none; border-radius: 20px;
-    padding: 0.45rem 1rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem; font-weight: 500;
+    background: var(--accent); color: white; border: none; border-radius: 20px;
+    padding: 0.4rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500;
     cursor: pointer; display: flex; align-items: center; gap: 5px;
   }
   #share-btn:active { opacity: 0.75; }
   #share-toast {
     position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
-    background: var(--ink); color: white;
-    padding: 0.6rem 1.2rem; border-radius: 20px;
-    font-size: 0.82rem; white-space: nowrap;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100;
+    background: var(--ink); color: white; padding: 0.6rem 1.2rem; border-radius: 20px;
+    font-size: 0.82rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100;
   }
   #share-toast.show { opacity: 1; }
-  .list-header {
-    padding: 1.2rem 1.5rem 0.5rem;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .list-header span {
-    font-size: 0.78rem; color: var(--muted);
-    font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;
-  }
-  #clear-done {
-    font-size: 0.78rem; color: var(--accent);
-    background: none; border: none;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer; font-weight: 500; display: none;
-  }
+  .list-header { padding: 1.2rem 1.5rem 0.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .list-header span { font-size: 0.78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+  #clear-done { font-size: 0.78rem; color: var(--accent); background: none; border: none; font-family: 'DM Sans', sans-serif; cursor: pointer; font-weight: 500; display: none; }
   #todo-list { padding: 0 1rem; display: flex; flex-direction: column; gap: 8px; }
   .todo-item {
-    background: var(--card); border-radius: 12px;
-    border: 1px solid var(--border); padding: 0.85rem 1rem;
-    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--card); border-radius: 12px; border: 1px solid var(--border);
+    padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 12px;
     animation: slideIn 0.2s ease; box-shadow: var(--shadow);
   }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
   .todo-check {
-    width: 22px; height: 22px; min-width: 22px;
-    border-radius: 50%; border: 2px solid var(--border);
-    background: white; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s; margin-top: 1px;
+    width: 22px; height: 22px; min-width: 22px; border-radius: 50%;
+    border: 2px solid var(--border); background: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 2px;
   }
   .todo-item.done .todo-check { background: var(--accent); border-color: var(--accent); }
   .todo-check svg { display: none; }
   .todo-item.done .todo-check svg { display: block; }
-  .todo-text {
-    flex: 1; font-size: 0.97rem; line-height: 1.45; color: var(--ink);
-    transition: all 0.2s; word-break: break-word; outline: none; cursor: text;
-  }
-  .todo-item.done .todo-text {
-    color: var(--done);
-    text-decoration: line-through;
-    text-decoration-color: var(--done);
-  }
-  .todo-del {
-    background: none; border: none; color: var(--border);
-    cursor: pointer; font-size: 1.1rem; padding: 0 2px;
-    line-height: 1; transition: color 0.15s; margin-top: 1px;
-  }
+  .todo-body { flex: 1; min-width: 0; }
+  .todo-text { font-size: 0.97rem; line-height: 1.45; color: var(--ink); word-break: break-word; outline: none; cursor: text; transition: all 0.2s; }
+  .todo-item.done .todo-text { color: var(--done); text-decoration: line-through; text-decoration-color: var(--done); }
+  .todo-meta { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+  .todo-meta .author { font-weight: 500; color: var(--accent); }
+  .todo-del { background: none; border: none; color: var(--border); cursor: pointer; font-size: 1.1rem; padding: 0 2px; line-height: 1; transition: color 0.15s; margin-top: 1px; }
   .todo-del:active { color: var(--accent); }
   .empty-state { text-align: center; padding: 3rem 2rem; color: var(--muted); }
   .empty-state .big { font-size: 2.5rem; margin-bottom: 0.8rem; }
   .empty-state p { font-size: 0.9rem; line-height: 1.6; }
   #bottom-bar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--card); border-top: 1px solid var(--border);
-    padding: 0.9rem 1rem;
+    position: fixed; bottom: 0; left: 0; right: 0; background: var(--card);
+    border-top: 1px solid var(--border); padding: 0.9rem 1rem;
     display: flex; align-items: center; gap: 10px;
     box-shadow: 0 -4px 20px rgba(26,24,20,0.07);
   }
   #text-input {
-    flex: 1; background: var(--bg); border: 1px solid var(--border);
-    border-radius: 24px; padding: 0.65rem 1rem;
-    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none;
+    flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 24px;
+    padding: 0.65rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none;
   }
   #text-input:focus { border-color: var(--ink); }
   #text-input::placeholder { color: var(--muted); }
   #add-btn {
-    background: var(--ink); color: white;
-    border: none; border-radius: 50%;
-    width: 42px; height: 42px; min-width: 42px;
-    font-size: 1.3rem; cursor: pointer;
+    background: var(--ink); color: white; border: none; border-radius: 50%;
+    width: 42px; height: 42px; min-width: 42px; font-size: 1.3rem; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
   }
   #add-btn:active { background: #333; }
   #mic-btn {
-    width: 42px; height: 42px; min-width: 42px;
-    border-radius: 50%; border: 2px solid var(--border);
-    background: white; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    width: 42px; height: 42px; min-width: 42px; border-radius: 50%;
+    border: 2px solid var(--border); background: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
   }
-  #mic-btn.listening {
-    background: var(--accent-light); border-color: var(--accent);
-    animation: pulse 1s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(200,75,47,0.3); }
-    50%       { box-shadow: 0 0 0 6px rgba(200,75,47,0); }
-  }
+  #mic-btn.listening { background: var(--accent-light); border-color: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(200,75,47,0.3);} 50%{box-shadow:0 0 0 6px rgba(200,75,47,0);} }
   #mic-btn svg { pointer-events: none; }
   #listening-label {
     position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-    background: var(--accent); color: white;
-    padding: 0.4rem 1rem; border-radius: 16px;
-    font-size: 0.8rem; font-weight: 500;
-    opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap;
+    background: var(--accent); color: white; padding: 0.4rem 1rem; border-radius: 16px;
+    font-size: 0.8rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap;
   }
   #listening-label.show { opacity: 1; }
-  #no-speech-msg {
-    color: var(--accent); font-size: 0.78rem;
-    text-align: center; padding: 0.3rem 1rem; display: none;
-  }
-  #sync-indicator {
-    position: fixed; top: 70px; right: 12px;
-    font-size: 0.72rem; color: var(--muted);
-    opacity: 0; transition: opacity 0.3s;
-  }
+  #sync-indicator { position: fixed; top: 70px; right: 12px; font-size: 0.72rem; color: var(--muted); opacity: 0; transition: opacity 0.3s; }
   #sync-indicator.show { opacity: 1; }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>✎ Meine ToDo-Liste</h1>
-  <button id="share-btn">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-    </svg>
-    Teilen
-  </button>
-</header>
-
-<div id="share-toast">Link kopiert!</div>
-<div id="listening-label">🎤 Höre zu …</div>
-<div id="sync-indicator">↻ Synchronisiert</div>
-
-<div class="list-header">
-  <span id="count-label">Lädt …</span>
-  <button id="clear-done">Erledigte löschen</button>
+<div id="login-screen">
+  <div class="login-card">
+    <h2>✎ ToDo-Liste</h2>
+    <p>Bitte melde dich an, um Zugang zur Liste zu erhalten.</p>
+    <label>Dein Name</label>
+    <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="name">
+    <label>Passwort</label>
+    <input type="password" id="login-pw" placeholder="••••••••">
+    <button id="login-btn">Anmelden</button>
+    <div id="login-error">Falsches Passwort. Bitte versuche es erneut.</div>
+    <div id="login-loading">Prüfe Passwort …</div>
+  </div>
 </div>
-<div id="no-speech-msg">Spracheingabe nicht verfügbar. Bitte Edge oder Chrome verwenden.</div>
-<div id="todo-list"></div>
 
-<div id="bottom-bar">
-  <button id="mic-btn" title="Spracheingabe">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="9" y="2" width="6" height="11" rx="3"/>
-      <path d="M5 10a7 7 0 0 0 14 0"/>
-      <line x1="12" y1="19" x2="12" y2="22"/>
-      <line x1="9" y1="22" x2="15" y2="22"/>
-    </svg>
-  </button>
-  <input type="text" id="text-input" placeholder="Aufgabe eingeben …">
-  <button id="add-btn">+</button>
+<div id="app-screen">
+  <header>
+    <h1>✎ ToDo-Liste</h1>
+    <div class="header-right">
+      <span id="user-badge"></span>
+      <button id="share-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        Teilen
+      </button>
+    </div>
+  </header>
+  <div id="share-toast">Link kopiert!</div>
+  <div id="listening-label">🎤 Höre zu …</div>
+  <div id="sync-indicator">↻ Gespeichert</div>
+  <div class="list-header">
+    <span id="count-label">Lädt …</span>
+    <button id="clear-done">Erledigte löschen</button>
+  </div>
+  <div id="todo-list"></div>
+  <div id="bottom-bar">
+    <button id="mic-btn" title="Spracheingabe">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="11" rx="3"/>
+        <path d="M5 10a7 7 0 0 0 14 0"/>
+        <line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/>
+      </svg>
+    </button>
+    <input type="text" id="text-input" placeholder="Aufgabe eingeben …">
+    <button id="add-btn">+</button>
+  </div>
 </div>
 
 <script>
-const DB = 'https://todo-liste-d024d-default-rtdb.europe-west1.firebasedatabase.app/todos/geteilt.json';
-let todos = [];
+const DB_ROOT = 'https://todo-liste-d024d-default-rtdb.europe-west1.firebasedatabase.app';
+const DB_TODOS = DB_ROOT + '/todos/geteilt.json';
+const DB_CONFIG = DB_ROOT + '/config/passwort.json';
 
+let todos = [];
+let currentUser = '';
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+async function checkLogin() {
+  const saved = sessionStorage.getItem('todo_user');
+  if (saved) { currentUser = saved; showApp(); return; }
+}
+
+function showApp() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app-screen').classList.add('visible');
+  document.getElementById('user-badge').textContent = '👤 ' + currentUser;
+  loadFromDB().then(render);
+  setInterval(async () => { await loadFromDB(); render(); }, 5000);
+}
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('login-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-pw').focus(); });
+
+async function doLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const err = document.getElementById('login-error');
+  const loading = document.getElementById('login-loading');
+  err.style.display = 'none';
+
+  if (!name) { err.textContent = 'Bitte gib deinen Namen ein.'; err.style.display = 'block'; return; }
+  if (!pw) { err.textContent = 'Bitte gib das Passwort ein.'; err.style.display = 'block'; return; }
+
+  loading.style.display = 'block';
+  document.getElementById('login-btn').disabled = true;
+
+  try {
+    const res = await fetch(DB_CONFIG);
+    const correctPw = await res.json();
+    if (pw === correctPw) {
+      currentUser = name;
+      sessionStorage.setItem('todo_user', name);
+      showApp();
+    } else {
+      err.textContent = 'Falsches Passwort. Bitte versuche es erneut.';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Verbindungsfehler. Bitte versuche es erneut.';
+    err.style.display = 'block';
+  }
+
+  loading.style.display = 'none';
+  document.getElementById('login-btn').disabled = false;
+}
+
+// ── Firebase ──────────────────────────────────────────────────────────────────
 function showSync() {
   const el = document.getElementById('sync-indicator');
   el.classList.add('show');
@@ -213,47 +246,39 @@ function showSync() {
 
 async function loadFromDB() {
   try {
-    const res = await fetch(DB);
+    const res = await fetch(DB_TODOS);
     const data = await res.json();
-    if (data && typeof data === 'object') {
-      todos = Object.values(data).sort((a, b) => b.id - a.id);
-    } else {
-      todos = [];
-    }
-  } catch (e) {
-    console.error('Ladefehler:', e);
-  }
+    todos = data && typeof data === 'object' ? Object.values(data).sort((a,b) => b.id - a.id) : [];
+  } catch(e) { console.error(e); }
 }
 
 async function saveToDB() {
   const obj = {};
   todos.forEach(t => { obj['id_' + t.id] = t; });
-  await fetch(DB, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(obj)
-  });
+  await fetch(DB_TODOS, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(obj) });
   showSync();
 }
 
-function escHtml(s) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// ── Render ────────────────────────────────────────────────────────────────────
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 60000);
+  if (diff < 1) return 'gerade eben';
+  if (diff < 60) return `vor ${diff} Min.`;
+  const h = Math.floor(diff / 60);
+  if (h < 24) return `vor ${h} Std.`;
+  return `vor ${Math.floor(h/24)} Tag(en)`;
 }
 
 function render() {
   const list = document.getElementById('todo-list');
-  const countLabel = document.getElementById('count-label');
-  const clearDone = document.getElementById('clear-done');
   const doneCount = todos.filter(t => t.done).length;
-
-  countLabel.textContent = todos.length === 1 ? '1 Aufgabe' : `${todos.length} Aufgaben`;
-  clearDone.style.display = doneCount > 0 ? 'block' : 'none';
+  document.getElementById('count-label').textContent = todos.length === 1 ? '1 Aufgabe' : `${todos.length} Aufgaben`;
+  document.getElementById('clear-done').style.display = doneCount > 0 ? 'block' : 'none';
 
   if (todos.length === 0) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="big">🎤</div>
-      <p>Noch keine Aufgaben.<br>Tippe unten oder halte das Mikrofon gedrückt.</p>
-    </div>`;
+    list.innerHTML = `<div class="empty-state"><div class="big">🎤</div><p>Noch keine Aufgaben.<br>Tippe unten oder nutze das Mikrofon.</p></div>`;
     return;
   }
 
@@ -263,11 +288,15 @@ function render() {
     item.className = 'todo-item' + (t.done ? ' done' : '');
     item.innerHTML = `
       <button class="todo-check" data-i="${i}">
-        <svg width="11" height="11" viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="1,5 4.5,8.5 11,1"/>
-        </svg>
+        <svg width="11" height="11" viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,5 4.5,8.5 11,1"/></svg>
       </button>
-      <div class="todo-text" contenteditable="true" data-i="${i}">${escHtml(t.text)}</div>
+      <div class="todo-body">
+        <div class="todo-text" contenteditable="true" data-i="${i}">${escHtml(t.text)}</div>
+        <div class="todo-meta">
+          <span class="author">${escHtml(t.author || '?')}</span> · ${timeAgo(t.id)}
+          ${t.done && t.doneBy ? ` · erledigt von <span class="author">${escHtml(t.doneBy)}</span>` : ''}
+        </div>
+      </div>
       <button class="todo-del" data-i="${i}">×</button>`;
     list.appendChild(item);
   });
@@ -276,119 +305,68 @@ function render() {
     btn.addEventListener('click', async e => {
       const i = +e.currentTarget.dataset.i;
       todos[i].done = !todos[i].done;
+      todos[i].doneBy = todos[i].done ? currentUser : null;
       render(); await saveToDB();
     });
   });
   list.querySelectorAll('.todo-del').forEach(btn => {
     btn.addEventListener('click', async e => {
       const i = +e.currentTarget.dataset.i;
-      todos.splice(i, 1);
-      render(); await saveToDB();
+      todos.splice(i, 1); render(); await saveToDB();
     });
   });
   list.querySelectorAll('.todo-text').forEach(div => {
     div.addEventListener('blur', async e => {
       const i = +e.currentTarget.dataset.i;
       const newText = e.currentTarget.textContent.trim();
-      if (!newText) { todos.splice(i, 1); }
-      else { todos[i].text = newText; }
+      if (!newText) todos.splice(i, 1); else todos[i].text = newText;
       render(); await saveToDB();
     });
-    div.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); }
-    });
+    div.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } });
   });
 }
 
+// ── Aufgabe hinzufügen ────────────────────────────────────────────────────────
 async function addTodo(text) {
-  text = text.trim();
-  if (!text) return;
-  todos.unshift({ text, done: false, id: Date.now() });
+  text = text.trim(); if (!text) return;
+  todos.unshift({ text, done: false, id: Date.now(), author: currentUser });
   render(); await saveToDB();
 }
 
-// ── Texteingabe ───────────────────────────────────────────────────────────────
 const input = document.getElementById('text-input');
-document.getElementById('add-btn').addEventListener('click', () => {
-  addTodo(input.value); input.value = '';
-});
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter') { addTodo(input.value); input.value = ''; }
-});
+document.getElementById('add-btn').addEventListener('click', () => { addTodo(input.value); input.value = ''; });
+input.addEventListener('keydown', e => { if (e.key === 'Enter') { addTodo(input.value); input.value = ''; } });
+document.getElementById('clear-done').addEventListener('click', async () => { todos = todos.filter(t => !t.done); render(); await saveToDB(); });
 
-// ── Erledigte löschen ─────────────────────────────────────────────────────────
-document.getElementById('clear-done').addEventListener('click', async () => {
-  todos = todos.filter(t => !t.done);
-  render(); await saveToDB();
-});
-
-// ── Teilen ────────────────────────────────────────────────────────────────────
 document.getElementById('share-btn').addEventListener('click', () => {
   const url = 'https://renacuaja.github.io/todo-liste/';
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(url);
-  } else {
-    const ta = document.createElement('textarea');
-    ta.value = url; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta);
-  }
+  if (navigator.clipboard) navigator.clipboard.writeText(url);
+  else { const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
   const toast = document.getElementById('share-toast');
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
+  toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500);
 });
 
 // ── Spracheingabe ─────────────────────────────────────────────────────────────
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('mic-btn');
 const listeningLabel = document.getElementById('listening-label');
-
-if (!SR) {
-  document.getElementById('no-speech-msg').style.display = 'block';
-  micBtn.style.opacity = '0.3';
-  micBtn.disabled = true;
-} else {
+if (!SR) { micBtn.style.opacity = '0.3'; micBtn.disabled = true; }
+else {
   const recog = new SR();
-  recog.lang = 'de-DE';
-  recog.interimResults = false;
-  recog.maxAlternatives = 1;
+  recog.lang = 'de-DE'; recog.interimResults = false; recog.maxAlternatives = 1;
   let listening = false;
-
-  micBtn.addEventListener('click', () => {
-    if (listening) { recog.stop(); } else { recog.start(); }
-  });
-  recog.onstart = () => {
-    listening = true;
-    micBtn.classList.add('listening');
-    listeningLabel.classList.add('show');
-    micBtn.querySelector('svg').style.stroke = '#C84B2F';
-  };
-  recog.onend = () => {
-    listening = false;
-    micBtn.classList.remove('listening');
-    listeningLabel.classList.remove('show');
-    micBtn.querySelector('svg').style.stroke = '#1A1814';
-  };
-  recog.onerror = e => {
-    console.error('Sprachfehler:', e.error);
-    listening = false;
-    micBtn.classList.remove('listening');
-    listeningLabel.classList.remove('show');
-  };
+  micBtn.addEventListener('click', () => { if (listening) recog.stop(); else recog.start(); });
+  recog.onstart = () => { listening = true; micBtn.classList.add('listening'); listeningLabel.classList.add('show'); micBtn.querySelector('svg').style.stroke = '#C84B2F'; };
+  recog.onend = () => { listening = false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); micBtn.querySelector('svg').style.stroke = '#1A1814'; };
+  recog.onerror = () => { listening = false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); };
   recog.onresult = e => {
-    const transcript = e.results[0][0].transcript;
-    const parts = transcript.split(/[,;]|\bund\b/i).map(s => s.trim()).filter(Boolean);
+    const parts = e.results[0][0].transcript.split(/[,;]|\bund\b/i).map(s => s.trim()).filter(Boolean);
     parts.forEach(p => addTodo(p));
   };
 }
 
-// ── Alle 5 Sekunden von Firebase aktualisieren ────────────────────────────────
-setInterval(async () => {
-  await loadFromDB(); render();
-}, 5000);
-
 // ── Start ─────────────────────────────────────────────────────────────────────
-loadFromDB().then(render);
+checkLogin();
 </script>
 </body>
 </html>
