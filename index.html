@@ -78,7 +78,7 @@
   #past-notice { margin: 0 1rem 0.8rem; background: var(--accent-light); border-radius: 10px; padding: 0.6rem 1rem; font-size: 0.82rem; color: var(--accent); display: none; }
 
   /* Codewort-Legende */
-  #keyword-legend { margin: 0.8rem 1rem 0; background: var(--recur-light); border-radius: 10px; padding: 0.7rem 1rem; }
+  #keyword-legend { background: var(--recur-light); padding: 0.5rem 1rem; border-top: 1px solid #B5D4F4; }
   #keyword-legend p { font-size: 0.75rem; color: var(--recur); font-weight: 500; margin-bottom: 5px; }
   #keyword-legend .kw-list { display: flex; flex-wrap: wrap; gap: 5px; }
   .kw-chip { background: white; border: 1px solid #B5D4F4; border-radius: 8px; padding: 2px 8px; font-size: 0.72rem; color: var(--recur); font-weight: 500; }
@@ -149,23 +149,6 @@
 
   <div id="past-notice">📅 Vergangener Tag — neue Aufgaben werden zum heutigen Tag hinzugefügt.</div>
 
-  <div id="keyword-legend">
-    <p>🔁 Codewörter für wiederkehrende Aufgaben:</p>
-    <div class="kw-list">
-      <span class="kw-chip">täglich [Aufgabe]</span>
-      <span class="kw-chip">zweitägig [Aufgabe]</span>
-      <span class="kw-chip">wöchentlich [Aufgabe]</span>
-      <span class="kw-chip">montags [Aufgabe]</span>
-      <span class="kw-chip">dienstags [Aufgabe]</span>
-      <span class="kw-chip">mittwochs [Aufgabe]</span>
-      <span class="kw-chip">donnerstags [Aufgabe]</span>
-      <span class="kw-chip">freitags [Aufgabe]</span>
-      <span class="kw-chip">samstags [Aufgabe]</span>
-      <span class="kw-chip">sonntags [Aufgabe]</span>
-      <span class="kw-chip">montags mittwochs [Aufgabe]</span>
-    </div>
-  </div>
-
   <div id="share-toast">Link kopiert!</div>
   <div id="listening-label">🎤 Höre zu …</div>
   <div id="sync-indicator">↻ Gespeichert</div>
@@ -177,6 +160,9 @@
   <div id="todo-list"></div>
 
   <div id="bottom-bar">
+    <div id="keyword-legend">
+      <p>🔁 Codewörter: <span class="kw-chip">Täglich</span> <span class="kw-chip">Zweitägig</span> <span class="kw-chip">Wöchentlich</span> <span class="kw-chip">Montags</span> <span class="kw-chip">Dienstags</span> <span class="kw-chip">Mittwochs</span> <span class="kw-chip">Donnerstags</span> <span class="kw-chip">Freitags</span> <span class="kw-chip">Samstags</span> <span class="kw-chip">Sonntags</span> — jeweils gefolgt von der Aufgabe</p>
+    </div>
     <div class="input-row">
       <button id="mic-btn" title="Spracheingabe">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
