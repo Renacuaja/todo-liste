@@ -10,9 +10,10 @@
     --bg: #F5F2EC; --card: #FDFBF7; --ink: #1A1814; --muted: #8A8680;
     --accent: #C84B2F; --accent-light: #F5DDD8; --done: #B0ADA8;
     --border: #E2DED6; --shadow: 0 2px 12px rgba(26,24,20,0.08);
+    --recur: #185FA5; --recur-light: #E6F1FB;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; padding: 0 0 6rem; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; padding: 0 0 9rem; }
 
   /* Login */
   #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 2rem; }
@@ -40,7 +41,7 @@
   #share-btn { background: var(--accent); color: white; border: none; border-radius: 20px; padding: 0.4rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; }
   #share-btn:active { opacity: 0.75; }
 
-  /* Day navigation */
+  /* Day nav */
   #day-nav { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.2rem 0.4rem; }
   .day-nav-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink); transition: all 0.15s; }
   .day-nav-btn:active { background: var(--border); }
@@ -54,8 +55,10 @@
   .list-header { padding: 0.4rem 1.5rem 0.5rem; display: flex; align-items: center; justify-content: space-between; }
   .list-header span { font-size: 0.78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
   #clear-done { font-size: 0.78rem; color: var(--accent); background: none; border: none; font-family: 'DM Sans', sans-serif; cursor: pointer; font-weight: 500; display: none; }
+
   #todo-list { padding: 0 1rem; display: flex; flex-direction: column; gap: 8px; }
   .todo-item { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 12px; animation: slideIn 0.2s ease; box-shadow: var(--shadow); }
+  .todo-item.recurring { border-left: 3px solid var(--recur); }
   @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
   .todo-check { width: 22px; height: 22px; min-width: 22px; border-radius: 50%; border: 2px solid var(--border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 2px; }
   .todo-item.done .todo-check { background: var(--accent); border-color: var(--accent); }
@@ -64,18 +67,24 @@
   .todo-body { flex: 1; min-width: 0; }
   .todo-text { font-size: 0.97rem; line-height: 1.45; color: var(--ink); word-break: break-word; outline: none; cursor: text; transition: all 0.2s; }
   .todo-item.done .todo-text { color: var(--done); text-decoration: line-through; text-decoration-color: var(--done); }
-  .todo-meta { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+  .todo-meta { font-size: 0.72rem; color: var(--muted); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
   .todo-meta .author { font-weight: 500; color: var(--accent); }
+  .recur-badge { background: var(--recur-light); color: var(--recur); font-size: 0.68rem; font-weight: 500; padding: 1px 6px; border-radius: 8px; }
   .todo-del { background: none; border: none; color: var(--border); cursor: pointer; font-size: 1.1rem; padding: 0 2px; line-height: 1; transition: color 0.15s; margin-top: 1px; }
   .todo-del:active { color: var(--accent); }
   .empty-state { text-align: center; padding: 3rem 2rem; color: var(--muted); }
   .empty-state .big { font-size: 2.5rem; margin-bottom: 0.8rem; }
   .empty-state p { font-size: 0.9rem; line-height: 1.6; }
-
-  /* Past day notice */
   #past-notice { margin: 0 1rem 0.8rem; background: var(--accent-light); border-radius: 10px; padding: 0.6rem 1rem; font-size: 0.82rem; color: var(--accent); display: none; }
 
-  #bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 0.9rem 1rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 -4px 20px rgba(26,24,20,0.07); }
+  /* Codewort-Legende */
+  #keyword-legend { margin: 0.8rem 1rem 0; background: var(--recur-light); border-radius: 10px; padding: 0.7rem 1rem; }
+  #keyword-legend p { font-size: 0.75rem; color: var(--recur); font-weight: 500; margin-bottom: 5px; }
+  #keyword-legend .kw-list { display: flex; flex-wrap: wrap; gap: 5px; }
+  .kw-chip { background: white; border: 1px solid #B5D4F4; border-radius: 8px; padding: 2px 8px; font-size: 0.72rem; color: var(--recur); font-weight: 500; }
+
+  #bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 0.7rem 1rem 0.9rem; box-shadow: 0 -4px 20px rgba(26,24,20,0.07); }
+  .input-row { display: flex; align-items: center; gap: 10px; }
   #text-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 24px; padding: 0.65rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none; }
   #text-input:focus { border-color: var(--ink); }
   #text-input::placeholder { color: var(--muted); }
@@ -85,7 +94,7 @@
   #mic-btn.listening { background: var(--accent-light); border-color: var(--accent); animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(200,75,47,0.3);} 50%{box-shadow:0 0 0 6px rgba(200,75,47,0);} }
   #mic-btn svg { pointer-events: none; }
-  #listening-label { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 0.4rem 1rem; border-radius: 16px; font-size: 0.8rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap; }
+  #listening-label { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 0.4rem 1rem; border-radius: 16px; font-size: 0.8rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap; }
   #listening-label.show { opacity: 1; }
   #sync-indicator { position: fixed; top: 70px; right: 12px; font-size: 0.72rem; color: var(--muted); opacity: 0; transition: opacity 0.3s; }
   #sync-indicator.show { opacity: 1; }
@@ -102,7 +111,7 @@
     <label>Passwort</label>
     <input type="password" id="login-pw" placeholder="••••••••">
     <button id="login-btn">Anmelden</button>
-    <div id="login-error">Falsches Passwort. Bitte versuche es erneut.</div>
+    <div id="login-error"></div>
     <div id="login-loading">Prüfe Passwort …</div>
   </div>
 </div>
@@ -140,69 +149,221 @@
 
   <div id="past-notice">📅 Vergangener Tag — neue Aufgaben werden zum heutigen Tag hinzugefügt.</div>
 
+  <div id="keyword-legend">
+    <p>🔁 Codewörter für wiederkehrende Aufgaben:</p>
+    <div class="kw-list">
+      <span class="kw-chip">täglich [Aufgabe]</span>
+      <span class="kw-chip">zweitägig [Aufgabe]</span>
+      <span class="kw-chip">wöchentlich [Aufgabe]</span>
+      <span class="kw-chip">montags [Aufgabe]</span>
+      <span class="kw-chip">dienstags [Aufgabe]</span>
+      <span class="kw-chip">mittwochs [Aufgabe]</span>
+      <span class="kw-chip">donnerstags [Aufgabe]</span>
+      <span class="kw-chip">freitags [Aufgabe]</span>
+      <span class="kw-chip">samstags [Aufgabe]</span>
+      <span class="kw-chip">sonntags [Aufgabe]</span>
+      <span class="kw-chip">montags mittwochs [Aufgabe]</span>
+    </div>
+  </div>
+
   <div id="share-toast">Link kopiert!</div>
   <div id="listening-label">🎤 Höre zu …</div>
   <div id="sync-indicator">↻ Gespeichert</div>
+
   <div class="list-header">
     <span id="count-label">Lädt …</span>
     <button id="clear-done">Erledigte löschen</button>
   </div>
   <div id="todo-list"></div>
+
   <div id="bottom-bar">
-    <button id="mic-btn" title="Spracheingabe">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="9" y="2" width="6" height="11" rx="3"/>
-        <path d="M5 10a7 7 0 0 0 14 0"/>
-        <line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/>
-      </svg>
-    </button>
-    <input type="text" id="text-input" placeholder="Aufgabe eingeben …">
-    <button id="add-btn">+</button>
+    <div class="input-row">
+      <button id="mic-btn" title="Spracheingabe">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="11" rx="3"/>
+          <path d="M5 10a7 7 0 0 0 14 0"/>
+          <line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/>
+        </svg>
+      </button>
+      <input type="text" id="text-input" placeholder="Aufgabe oder: täglich Aufgabe …">
+      <button id="add-btn">+</button>
+    </div>
   </div>
 </div>
 
 <script>
 const DB_ROOT = 'https://todo-liste-d024d-default-rtdb.europe-west1.firebasedatabase.app';
 const DB_CONFIG = DB_ROOT + '/todos/config/passwort.json';
+const DB_RECUR = DB_ROOT + '/wiederkehrend.json';
 
-let allDays = {};       // { "2026-04-07": { id_xxx: {}, ... }, ... }
+let allDays = {};
+let recurTasks = [];   // Master-Liste wiederkehrender Aufgaben
 let currentUser = '';
-let viewDateKey = '';   // z.B. "2026-04-07"
+let viewDateKey = '';
 
-// ── Datums-Hilfsfunktionen ────────────────────────────────────────────────────
+// ── Datumshilfen ──────────────────────────────────────────────────────────────
 function todayKey() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
-
-function keyToDate(key) {
-  const [y,m,d] = key.split('-').map(Number);
-  return new Date(y, m-1, d);
-}
-
-function formatDayLabel(key) {
-  const d = keyToDate(key);
-  const today = todayKey();
-  const yesterday = offsetKey(today, -1);
-  const tomorrow = offsetKey(today, 1);
-  if (key === today) return { name: 'Heute', sub: d.toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'}) };
-  if (key === yesterday) return { name: 'Gestern', sub: d.toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'}) };
-  if (key === tomorrow) return { name: 'Morgen', sub: d.toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'}) };
-  return { name: d.toLocaleDateString('de-DE', {weekday:'long'}), sub: d.toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'}) };
-}
-
+function keyToDate(key) { const [y,m,d] = key.split('-').map(Number); return new Date(y, m-1, d); }
 function offsetKey(key, days) {
-  const d = keyToDate(key);
-  d.setDate(d.getDate() + days);
+  const d = keyToDate(key); d.setDate(d.getDate() + days);
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
+function formatDayLabel(key) {
+  const d = keyToDate(key); const today = todayKey();
+  if (key === today) return { name: 'Heute', sub: d.toLocaleDateString('de-DE', {day:'numeric',month:'long',year:'numeric'}) };
+  if (key === offsetKey(today,-1)) return { name: 'Gestern', sub: d.toLocaleDateString('de-DE', {day:'numeric',month:'long',year:'numeric'}) };
+  if (key === offsetKey(today,1)) return { name: 'Morgen', sub: d.toLocaleDateString('de-DE', {day:'numeric',month:'long',year:'numeric'}) };
+  return { name: d.toLocaleDateString('de-DE', {weekday:'long'}), sub: d.toLocaleDateString('de-DE', {day:'numeric',month:'long',year:'numeric'}) };
+}
+function dbDayUrl(key) { return DB_ROOT + '/tage/' + key + '.json'; }
+function dbAllUrl() { return DB_ROOT + '/tage.json'; }
 
-function dbDayUrl(key) {
-  return DB_ROOT + '/tage/' + key + '.json';
+// ── Wiederkehrende Aufgaben parsen ────────────────────────────────────────────
+const WOCHENTAGE = { montags:1, dienstags:2, mittwochs:3, donnerstags:4, freitags:5, samstags:6, sonntags:0 };
+
+function parseRecurrence(text) {
+  const t = text.trim().toLowerCase();
+  const words = t.split(/\s+/);
+
+  // Sammle Wochentag-Codewörter am Anfang
+  let days = [];
+  let i = 0;
+  while (i < words.length && WOCHENTAGE[words[i]] !== undefined) {
+    days.push(WOCHENTAGE[words[i]]);
+    i++;
+  }
+  if (days.length > 0) {
+    const taskText = text.trim().split(/\s+/).slice(i).join(' ');
+    if (!taskText) return null;
+    return { type: 'weekdays', days, label: days.map(d => Object.keys(WOCHENTAGE).find(k => WOCHENTAGE[k]===d)).join(', '), taskText };
+  }
+
+  if (words[0] === 'täglich') {
+    const taskText = text.trim().split(/\s+/).slice(1).join(' ');
+    if (!taskText) return null;
+    return { type: 'daily', label: 'täglich', taskText };
+  }
+  if (words[0] === 'zweitägig') {
+    const taskText = text.trim().split(/\s+/).slice(1).join(' ');
+    if (!taskText) return null;
+    return { type: 'every_n', n: 2, label: 'alle 2 Tage', taskText };
+  }
+  if (words[0] === 'wöchentlich') {
+    const taskText = text.trim().split(/\s+/).slice(1).join(' ');
+    if (!taskText) return null;
+    return { type: 'weekly', label: 'wöchentlich', taskText };
+  }
+  return null;
 }
 
-function dbAllUrl() {
-  return DB_ROOT + '/tage.json';
+function isRecurDueOn(recur, dateKey) {
+  const d = keyToDate(dateKey);
+  const dow = d.getDay(); // 0=So
+  if (recur.type === 'daily') return true;
+  if (recur.type === 'weekdays') return recur.days.includes(dow);
+  if (recur.type === 'weekly') {
+    // fällig am gleichen Wochentag wie das Erstelldatum
+    const created = keyToDate(recur.createdOnKey);
+    return dow === created.getDay();
+  }
+  if (recur.type === 'every_n') {
+    const created = keyToDate(recur.createdOnKey);
+    const diff = Math.round((d - created) / 86400000);
+    return diff >= 0 && diff % recur.n === 0;
+  }
+  return false;
+}
+
+// ── Firebase ──────────────────────────────────────────────────────────────────
+function showSync() {
+  const el = document.getElementById('sync-indicator');
+  el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1500);
+}
+async function loadAll() {
+  try {
+    const [dRes, rRes] = await Promise.all([fetch(dbAllUrl()), fetch(DB_RECUR)]);
+    const dData = await dRes.json();
+    const rData = await rRes.json();
+    allDays = dData && typeof dData === 'object' ? dData : {};
+    recurTasks = rData && Array.isArray(rData) ? rData : (rData && typeof rData === 'object' ? Object.values(rData) : []);
+  } catch(e) { console.error(e); }
+}
+async function saveDayToDB(key) {
+  const obj = allDays[key] || null;
+  await fetch(dbDayUrl(key), { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
+  showSync();
+}
+async function saveRecurToDB() {
+  const obj = {};
+  recurTasks.forEach(t => { obj['rid_' + t.rid] = t; });
+  await fetch(DB_RECUR, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
+}
+
+function todosForDay(key) {
+  const day = allDays[key];
+  const base = day && typeof day === 'object' ? Object.values(day) : [];
+  return base.sort((a,b) => {
+    if (a.recurId && !b.recurId) return -1;
+    if (!a.recurId && b.recurId) return 1;
+    return b.id - a.id;
+  });
+}
+
+// ── Wiederkehrende Aufgaben für einen Tag befüllen ────────────────────────────
+function ensureRecurringForDay(key) {
+  if (!allDays[key]) allDays[key] = {};
+  recurTasks.forEach(rt => {
+    if (!isRecurDueOn(rt, key)) return;
+    // Prüfe ob bereits vorhanden
+    const existing = Object.values(allDays[key]).find(t => t.recurId === rt.rid);
+    if (!existing) {
+      const id = parseInt(key.replace(/-/g,'')) * 100000 + rt.rid;
+      allDays[key]['id_' + id] = {
+        text: rt.taskText, done: false, id,
+        author: rt.author, recurId: rt.rid,
+        recurLabel: rt.label
+      };
+    }
+  });
+}
+
+// ── Mitternacht ───────────────────────────────────────────────────────────────
+async function doMidnightRollover() {
+  const today = todayKey();
+  const keys = Object.keys(allDays).filter(k => k < today);
+  let changed = false;
+  for (const key of keys) {
+    const day = allDays[key];
+    if (!day) continue;
+    const undone = Object.values(day).filter(t => !t.done && !t.recurId);
+    if (undone.length === 0) continue;
+    if (!allDays[today]) allDays[today] = {};
+    undone.forEach(t => {
+      const newId = t.id + 1;
+      allDays[today]['id_' + newId] = { ...t, id: newId, movedFrom: key };
+      delete allDays[key]['id_' + t.id];
+    });
+    changed = true;
+    await saveDayToDB(key);
+  }
+  if (changed) await saveDayToDB(today);
+}
+
+function scheduleMidnightCheck() {
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 5);
+  setTimeout(async () => {
+    viewDateKey = todayKey();
+    await loadAll(); await doMidnightRollover();
+    ensureRecurringForDay(viewDateKey);
+    await saveDayToDB(viewDateKey);
+    renderDay();
+    document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    scheduleMidnightCheck();
+  }, midnight - now);
 }
 
 // ── Login ─────────────────────────────────────────────────────────────────────
@@ -210,28 +371,25 @@ function checkLogin() {
   const saved = sessionStorage.getItem('todo_user');
   if (saved) { currentUser = saved; showApp(); }
 }
-
 function showApp() {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app-screen').classList.add('visible');
   document.getElementById('user-badge').textContent = '👤 ' + currentUser;
-
-  const heute = new Date();
-  document.getElementById('header-date').textContent = heute.toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-
+  document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
   viewDateKey = todayKey();
-  loadAll().then(() => {
-    doMidnightRollover();
+  loadAll().then(async () => {
+    await doMidnightRollover();
+    ensureRecurringForDay(viewDateKey);
+    await saveDayToDB(viewDateKey);
     renderDay();
   });
-
-  setInterval(async () => { await loadAll(); renderDay(); }, 5000);
+  setInterval(async () => { await loadAll(); ensureRecurringForDay(viewDateKey); renderDay(); }, 5000);
   scheduleMidnightCheck();
 }
 
 document.getElementById('login-btn').addEventListener('click', doLogin);
-document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-document.getElementById('login-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-pw').focus(); });
+document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+document.getElementById('login-name').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('login-pw').focus(); });
 
 async function doLogin() {
   const name = document.getElementById('login-name').value.trim();
@@ -246,111 +404,29 @@ async function doLogin() {
   try {
     const res = await fetch(DB_CONFIG);
     const correctPw = await res.json();
-    if (pw === correctPw) {
-      currentUser = name;
-      sessionStorage.setItem('todo_user', name);
-      showApp();
-    } else {
-      err.textContent = 'Falsches Passwort. Bitte versuche es erneut.';
-      err.style.display = 'block';
-    }
-  } catch(e) {
-    err.textContent = 'Verbindungsfehler. Bitte versuche es erneut.';
-    err.style.display = 'block';
-  }
+    if (pw === correctPw) { currentUser = name; sessionStorage.setItem('todo_user', name); showApp(); }
+    else { err.textContent = 'Falsches Passwort. Bitte versuche es erneut.'; err.style.display = 'block'; }
+  } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
   loading.style.display = 'none';
   document.getElementById('login-btn').disabled = false;
 }
 
-// ── Firebase ──────────────────────────────────────────────────────────────────
-function showSync() {
-  const el = document.getElementById('sync-indicator');
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 1500);
-}
-
-async function loadAll() {
-  try {
-    const res = await fetch(dbAllUrl());
-    const data = await res.json();
-    allDays = data && typeof data === 'object' ? data : {};
-  } catch(e) { console.error(e); }
-}
-
-async function saveDayToDB(key) {
-  const obj = allDays[key] || null;
-  await fetch(dbDayUrl(key), {
-    method: 'PUT',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(obj)
-  });
-  showSync();
-}
-
-function todosForDay(key) {
-  const day = allDays[key];
-  if (!day || typeof day !== 'object') return [];
-  return Object.values(day).sort((a,b) => b.id - a.id);
-}
-
-// ── Mitternachts-Verschiebung ─────────────────────────────────────────────────
-async function doMidnightRollover() {
-  const today = todayKey();
-  const keys = Object.keys(allDays).filter(k => k < today);
-  let changed = false;
-
-  for (const key of keys) {
-    const day = allDays[key];
-    if (!day) continue;
-    const undone = Object.values(day).filter(t => !t.done);
-    if (undone.length === 0) continue;
-
-    // Verschiebe unerledigte in den heutigen Tag
-    if (!allDays[today]) allDays[today] = {};
-    undone.forEach(t => {
-      const newId = t.id + 1; // minimal versetzt damit keine Kollision
-      allDays[today]['id_' + newId] = { ...t, id: newId, movedFrom: key };
-      delete allDays[key]['id_' + t.id];
-    });
-    changed = true;
-    await saveDayToDB(key);
-  }
-
-  if (changed) await saveDayToDB(today);
-}
-
-function scheduleMidnightCheck() {
-  const now = new Date();
-  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 5);
-  const msUntilMidnight = midnight - now;
-  setTimeout(async () => {
-    viewDateKey = todayKey();
-    await loadAll();
-    await doMidnightRollover();
-    renderDay();
-    document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-    scheduleMidnightCheck();
-  }, msUntilMidnight);
-}
-
 // ── Navigation ────────────────────────────────────────────────────────────────
-document.getElementById('prev-day').addEventListener('click', () => {
-  viewDateKey = offsetKey(viewDateKey, -1);
-  renderDay();
-});
-document.getElementById('next-day').addEventListener('click', () => {
+document.getElementById('prev-day').addEventListener('click', () => { viewDateKey = offsetKey(viewDateKey,-1); renderDay(); });
+document.getElementById('next-day').addEventListener('click', async () => {
   viewDateKey = offsetKey(viewDateKey, 1);
+  ensureRecurringForDay(viewDateKey);
+  await saveDayToDB(viewDateKey);
   renderDay();
 });
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
 function timeAgo(ts) {
   const diff = Math.floor((Date.now() - ts) / 60000);
   if (diff < 1) return 'gerade eben';
   if (diff < 60) return `vor ${diff} Min.`;
-  const h = Math.floor(diff / 60);
+  const h = Math.floor(diff/60);
   if (h < 24) return `vor ${h} Std.`;
   return `vor ${Math.floor(h/24)} Tag(en)`;
 }
@@ -359,20 +435,17 @@ function renderDay() {
   const today = todayKey();
   const isToday = viewDateKey === today;
   const isFuture = viewDateKey > today;
+  const inputDisabled = !isToday && !isFuture;
 
-  // Tagnavigation
   const label = formatDayLabel(viewDateKey);
   document.querySelector('#day-label .day-name').textContent = label.name;
   document.querySelector('#day-label .day-sub').textContent = label.sub;
   document.getElementById('next-day').disabled = isFuture;
-  document.getElementById('past-notice').style.display = (!isToday && !isFuture) ? 'block' : 'none';
-
-  // Eingabe nur für heute/morgen aktiv
-  const inputDisabled = (!isToday && !isFuture);
+  document.getElementById('past-notice').style.display = inputDisabled ? 'block' : 'none';
   document.getElementById('text-input').disabled = inputDisabled;
   document.getElementById('add-btn').disabled = inputDisabled;
   document.getElementById('mic-btn').disabled = inputDisabled;
-  document.getElementById('text-input').placeholder = inputDisabled ? 'Vergangener Tag …' : 'Aufgabe eingeben …';
+  document.getElementById('text-input').placeholder = inputDisabled ? 'Vergangener Tag …' : 'Aufgabe oder: täglich Aufgabe …';
 
   const todos = todosForDay(viewDateKey);
   const doneCount = todos.filter(t => t.done).length;
@@ -381,27 +454,29 @@ function renderDay() {
 
   const list = document.getElementById('todo-list');
   if (todos.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="big">${isFuture ? '📅' : '🎤'}</div><p>${isFuture ? 'Noch kein Eintrag für diesen Tag.' : (isToday ? 'Noch keine Aufgaben.<br>Tippe unten oder nutze das Mikrofon.' : 'Keine Aufgaben an diesem Tag.')}</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="big">${isFuture?'📅':'🎤'}</div><p>${isFuture?'Noch kein Eintrag für diesen Tag.':(isToday?'Noch keine Aufgaben.<br>Tippe unten oder nutze das Mikrofon.':'Keine Aufgaben an diesem Tag.')}</p></div>`;
     return;
   }
 
   list.innerHTML = '';
   todos.forEach((t, i) => {
     const item = document.createElement('div');
-    item.className = 'todo-item' + (t.done ? ' done' : '');
+    item.className = 'todo-item' + (t.done?' done':'') + (t.recurId?' recurring':'');
     item.innerHTML = `
       <button class="todo-check" data-i="${i}">
         <svg width="11" height="11" viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,5 4.5,8.5 11,1"/></svg>
       </button>
       <div class="todo-body">
-        <div class="todo-text" contenteditable="${!inputDisabled}" data-i="${i}">${escHtml(t.text)}</div>
+        <div class="todo-text" contenteditable="${!inputDisabled && !t.recurId}" data-i="${i}">${escHtml(t.text)}</div>
         <div class="todo-meta">
-          <span class="author">${escHtml(t.author || '?')}</span> · ${timeAgo(t.id)}
+          ${t.recurId ? `<span class="recur-badge">🔁 ${escHtml(t.recurLabel||'')}</span>` : ''}
+          <span class="author">${escHtml(t.author||'?')}</span>
+          ${!t.recurId ? ` · ${timeAgo(t.id)}` : ''}
           ${t.movedFrom ? ` · verschoben von ${formatDayLabel(t.movedFrom).name}` : ''}
           ${t.done && t.doneBy ? ` · erledigt von <span class="author">${escHtml(t.doneBy)}</span>` : ''}
         </div>
       </div>
-      ${!inputDisabled ? `<button class="todo-del" data-i="${i}">×</button>` : ''}`;
+      ${!inputDisabled && !t.recurId ? `<button class="todo-del" data-i="${i}">×</button>` : ''}`;
     list.appendChild(item);
   });
 
@@ -409,9 +484,8 @@ function renderDay() {
     btn.addEventListener('click', async e => {
       const i = +e.currentTarget.dataset.i;
       const t = todos[i];
-      const key = 'id_' + t.id;
-      allDays[viewDateKey][key].done = !t.done;
-      allDays[viewDateKey][key].doneBy = !t.done ? currentUser : null;
+      allDays[viewDateKey]['id_' + t.id].done = !t.done;
+      allDays[viewDateKey]['id_' + t.id].doneBy = !t.done ? currentUser : null;
       renderDay(); await saveDayToDB(viewDateKey);
     });
   });
@@ -423,34 +497,47 @@ function renderDay() {
       renderDay(); await saveDayToDB(viewDateKey);
     });
   });
-  list.querySelectorAll('.todo-text').forEach(div => {
+  list.querySelectorAll('.todo-text[contenteditable="true"]').forEach(div => {
     div.addEventListener('blur', async e => {
       const i = +e.currentTarget.dataset.i;
       const t = todos[i];
       const newText = e.currentTarget.textContent.trim();
-      if (!newText) { delete allDays[viewDateKey]['id_' + t.id]; }
-      else { allDays[viewDateKey]['id_' + t.id].text = newText; }
+      if (!newText) delete allDays[viewDateKey]['id_' + t.id];
+      else allDays[viewDateKey]['id_' + t.id].text = newText;
       renderDay(); await saveDayToDB(viewDateKey);
     });
-    div.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } });
+    div.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); e.currentTarget.blur(); } });
   });
 }
 
-// ── Aufgabe hinzufügen (immer zum heutigen Tag) ───────────────────────────────
+// ── Aufgabe hinzufügen ────────────────────────────────────────────────────────
 async function addTodo(text) {
   text = text.trim(); if (!text) return;
   const key = todayKey();
   if (!allDays[key]) allDays[key] = {};
-  const id = Date.now();
-  allDays[key]['id_' + id] = { text, done: false, id, author: currentUser };
+
+  const recur = parseRecurrence(text);
+  if (recur) {
+    // Wiederkehrende Aufgabe anlegen
+    const rid = Date.now();
+    const rt = { rid, taskText: recur.taskText, type: recur.type, label: recur.label, author: currentUser, createdOnKey: key, days: recur.days || null, n: recur.n || null };
+    recurTasks.push(rt);
+    await saveRecurToDB();
+    // Für heute direkt eintragen
+    const id = rid;
+    allDays[key]['id_' + id] = { text: recur.taskText, done: false, id, author: currentUser, recurId: rid, recurLabel: recur.label };
+  } else {
+    const id = Date.now();
+    allDays[key]['id_' + id] = { text, done: false, id, author: currentUser };
+  }
+
   viewDateKey = key;
   renderDay(); await saveDayToDB(key);
 }
 
 const input = document.getElementById('text-input');
 document.getElementById('add-btn').addEventListener('click', () => { addTodo(input.value); input.value = ''; });
-input.addEventListener('keydown', e => { if (e.key === 'Enter') { addTodo(input.value); input.value = ''; } });
-
+input.addEventListener('keydown', e => { if (e.key==='Enter') { addTodo(input.value); input.value = ''; } });
 document.getElementById('clear-done').addEventListener('click', async () => {
   const day = allDays[viewDateKey];
   if (!day) return;
@@ -476,16 +563,23 @@ else {
   recog.lang = 'de-DE'; recog.interimResults = false; recog.maxAlternatives = 1;
   let listening = false;
   micBtn.addEventListener('click', () => { if (listening) recog.stop(); else recog.start(); });
-  recog.onstart = () => { listening = true; micBtn.classList.add('listening'); listeningLabel.classList.add('show'); micBtn.querySelector('svg').style.stroke = '#C84B2F'; };
-  recog.onend = () => { listening = false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); micBtn.querySelector('svg').style.stroke = '#1A1814'; };
-  recog.onerror = () => { listening = false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); };
+  recog.onstart = () => { listening=true; micBtn.classList.add('listening'); listeningLabel.classList.add('show'); micBtn.querySelector('svg').style.stroke='#C84B2F'; };
+  recog.onend = () => { listening=false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); micBtn.querySelector('svg').style.stroke='#1A1814'; };
+  recog.onerror = () => { listening=false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); };
   recog.onresult = e => {
-    const parts = e.results[0][0].transcript.split(/[,;]|\bund\b/i).map(s => s.trim()).filter(Boolean);
+    const transcript = e.results[0][0].transcript.trim();
+    // Versuche zuerst als ganzes (für Codewörter + Aufgabe in einem Satz)
+    const recur = parseRecurrence(transcript);
+    if (recur) { addTodo(transcript); return; }
+    // Sonst splitten
+    const parts = transcript.split(/[,;]|\bund\b/i).map(s => s.trim()).filter(Boolean);
     parts.forEach(p => addTodo(p));
   };
 }
 
-// ── Start ─────────────────────────────────────────────────────────────────────
+// ── Firebase Regeln Hinweis ───────────────────────────────────────────────────
+// Benötigt in Firebase: "wiederkehrend": { ".read": true, ".write": true }
+
 checkLogin();
 </script>
 </body>
