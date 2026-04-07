@@ -224,23 +224,23 @@ function parseRecurrence(text) {
   if (days.length > 0) {
     const taskText = text.trim().split(/\s+/).slice(i).join(' ');
     if (!taskText) return null;
-    return { type: 'weekdays', days, label: days.map(d => Object.keys(WOCHENTAGE).find(k => WOCHENTAGE[k]===d)).join(', '), taskText };
+    return { type: 'weekdays', days, label: days.map(d => { const w = Object.keys(WOCHENTAGE).find(k => WOCHENTAGE[k]===d); return w ? w.charAt(0).toUpperCase() + w.slice(1) : w; }).join(', '), taskText: capitalize(taskText) };
   }
 
   if (words[0] === 'täglich') {
     const taskText = text.trim().split(/\s+/).slice(1).join(' ');
     if (!taskText) return null;
-    return { type: 'daily', label: 'täglich', taskText };
+    return { type: 'daily', label: 'Täglich', taskText: capitalize(taskText) };
   }
   if (words[0] === 'zweitägig') {
     const taskText = text.trim().split(/\s+/).slice(1).join(' ');
     if (!taskText) return null;
-    return { type: 'every_n', n: 2, label: 'alle 2 Tage', taskText };
+    return { type: 'every_n', n: 2, label: 'Alle 2 Tage', taskText: capitalize(taskText) };
   }
   if (words[0] === 'wöchentlich') {
     const taskText = text.trim().split(/\s+/).slice(1).join(' ');
     if (!taskText) return null;
-    return { type: 'weekly', label: 'wöchentlich', taskText };
+    return { type: 'weekly', label: 'Wöchentlich', taskText: capitalize(taskText) };
   }
   return null;
 }
@@ -408,6 +408,7 @@ document.getElementById('next-day').addEventListener('click', async () => {
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function timeAgo(ts) {
   const diff = Math.floor((Date.now() - ts) / 60000);
   if (diff < 1) return 'gerade eben';
@@ -498,7 +499,7 @@ function renderDay() {
 
 // ── Aufgabe hinzufügen ────────────────────────────────────────────────────────
 async function addTodo(text) {
-  text = text.trim(); if (!text) return;
+  text = capitalize(text.trim()); if (!text) return;
   const key = todayKey();
   if (!allDays[key]) allDays[key] = {};
 
