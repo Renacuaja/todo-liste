@@ -49,6 +49,7 @@
     display: flex; align-items: center; justify-content: space-between;
   }
   header h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; font-weight: 400; }
+  #header-date { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
   .header-right { display: flex; align-items: center; gap: 8px; }
   #user-badge { font-size: 0.78rem; color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.1); padding: 0.3rem 0.7rem; border-radius: 12px; }
   #share-btn {
@@ -145,7 +146,10 @@
 
 <div id="app-screen">
   <header>
-    <h1>✎ ToDo-Liste</h1>
+    <div>
+      <h1>✎ ToDo-Liste</h1>
+      <div id="header-date"></div>
+    </div>
     <div class="header-right">
       <span id="user-badge"></span>
       <button id="share-btn">
@@ -196,6 +200,12 @@ function showApp() {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app-screen').classList.add('visible');
   document.getElementById('user-badge').textContent = '👤 ' + currentUser;
+
+  // Datum anzeigen
+  const heute = new Date();
+  const optionen = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  document.getElementById('header-date').textContent = heute.toLocaleDateString('de-DE', optionen);
+
   loadFromDB().then(render);
   setInterval(async () => { await loadFromDB(); render(); }, 5000);
 }
