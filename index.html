@@ -14,71 +14,50 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; padding: 0 0 6rem; }
 
-  #login-screen {
-    position: fixed; inset: 0; background: var(--bg);
-    display: flex; align-items: center; justify-content: center; z-index: 200; padding: 2rem;
-  }
+  /* Login */
+  #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 2rem; }
   #login-screen.hidden { display: none; }
-  .login-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 2rem 1.8rem; width: 100%; max-width: 360px; box-shadow: var(--shadow);
-  }
+  .login-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem 1.8rem; width: 100%; max-width: 360px; box-shadow: var(--shadow); }
   .login-card h2 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; font-weight: 400; margin-bottom: 0.3rem; }
   .login-card p { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.5; }
   .login-card label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
-  .login-card input {
-    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-    padding: 0.7rem 0.9rem; margin-bottom: 1rem;
-    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none;
-  }
+  .login-card input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 0.9rem; margin-bottom: 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none; }
   .login-card input:focus { border-color: var(--ink); }
-  .login-card button {
-    width: 100%; background: var(--ink); color: white; border: none; border-radius: 10px;
-    padding: 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer;
-  }
+  .login-card button { width: 100%; background: var(--ink); color: white; border: none; border-radius: 10px; padding: 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; }
   .login-card button:active { background: #333; }
   #login-error { color: var(--accent); font-size: 0.82rem; margin-top: 0.6rem; text-align: center; display: none; }
   #login-loading { color: var(--muted); font-size: 0.82rem; margin-top: 0.6rem; text-align: center; display: none; }
 
+  /* App */
   #app-screen { display: none; }
   #app-screen.visible { display: block; }
 
-  header {
-    background: var(--ink); color: white; padding: 1.2rem 1.5rem;
-    position: sticky; top: 0; z-index: 10;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  header h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; font-weight: 400; }
-  #header-date { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
+  header { background: var(--ink); color: white; padding: 1.2rem 1.5rem; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; }
+  .header-left h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; font-weight: 400; }
+  .header-left #header-date { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
   .header-right { display: flex; align-items: center; gap: 8px; }
   #user-badge { font-size: 0.78rem; color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.1); padding: 0.3rem 0.7rem; border-radius: 12px; }
-  #share-btn {
-    background: var(--accent); color: white; border: none; border-radius: 20px;
-    padding: 0.4rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500;
-    cursor: pointer; display: flex; align-items: center; gap: 5px;
-  }
+  #share-btn { background: var(--accent); color: white; border: none; border-radius: 20px; padding: 0.4rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; }
   #share-btn:active { opacity: 0.75; }
-  #share-toast {
-    position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
-    background: var(--ink); color: white; padding: 0.6rem 1.2rem; border-radius: 20px;
-    font-size: 0.82rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100;
-  }
+
+  /* Day navigation */
+  #day-nav { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.2rem 0.4rem; }
+  .day-nav-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink); transition: all 0.15s; }
+  .day-nav-btn:active { background: var(--border); }
+  .day-nav-btn:disabled { opacity: 0.25; cursor: default; }
+  #day-label { text-align: center; flex: 1; }
+  #day-label .day-name { font-size: 1rem; font-weight: 500; }
+  #day-label .day-sub { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+
+  #share-toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--ink); color: white; padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.82rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100; }
   #share-toast.show { opacity: 1; }
-  .list-header { padding: 1.2rem 1.5rem 0.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .list-header { padding: 0.4rem 1.5rem 0.5rem; display: flex; align-items: center; justify-content: space-between; }
   .list-header span { font-size: 0.78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
   #clear-done { font-size: 0.78rem; color: var(--accent); background: none; border: none; font-family: 'DM Sans', sans-serif; cursor: pointer; font-weight: 500; display: none; }
   #todo-list { padding: 0 1rem; display: flex; flex-direction: column; gap: 8px; }
-  .todo-item {
-    background: var(--card); border-radius: 12px; border: 1px solid var(--border);
-    padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 12px;
-    animation: slideIn 0.2s ease; box-shadow: var(--shadow);
-  }
+  .todo-item { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 12px; animation: slideIn 0.2s ease; box-shadow: var(--shadow); }
   @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-  .todo-check {
-    width: 22px; height: 22px; min-width: 22px; border-radius: 50%;
-    border: 2px solid var(--border); background: white; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 2px;
-  }
+  .todo-check { width: 22px; height: 22px; min-width: 22px; border-radius: 50%; border: 2px solid var(--border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 2px; }
   .todo-item.done .todo-check { background: var(--accent); border-color: var(--accent); }
   .todo-check svg { display: none; }
   .todo-item.done .todo-check svg { display: block; }
@@ -92,37 +71,21 @@
   .empty-state { text-align: center; padding: 3rem 2rem; color: var(--muted); }
   .empty-state .big { font-size: 2.5rem; margin-bottom: 0.8rem; }
   .empty-state p { font-size: 0.9rem; line-height: 1.6; }
-  #bottom-bar {
-    position: fixed; bottom: 0; left: 0; right: 0; background: var(--card);
-    border-top: 1px solid var(--border); padding: 0.9rem 1rem;
-    display: flex; align-items: center; gap: 10px;
-    box-shadow: 0 -4px 20px rgba(26,24,20,0.07);
-  }
-  #text-input {
-    flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 24px;
-    padding: 0.65rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none;
-  }
+
+  /* Past day notice */
+  #past-notice { margin: 0 1rem 0.8rem; background: var(--accent-light); border-radius: 10px; padding: 0.6rem 1rem; font-size: 0.82rem; color: var(--accent); display: none; }
+
+  #bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 0.9rem 1rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 -4px 20px rgba(26,24,20,0.07); }
+  #text-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 24px; padding: 0.65rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none; }
   #text-input:focus { border-color: var(--ink); }
   #text-input::placeholder { color: var(--muted); }
-  #add-btn {
-    background: var(--ink); color: white; border: none; border-radius: 50%;
-    width: 42px; height: 42px; min-width: 42px; font-size: 1.3rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
+  #add-btn { background: var(--ink); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; min-width: 42px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   #add-btn:active { background: #333; }
-  #mic-btn {
-    width: 42px; height: 42px; min-width: 42px; border-radius: 50%;
-    border: 2px solid var(--border); background: white; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-  }
+  #mic-btn { width: 42px; height: 42px; min-width: 42px; border-radius: 50%; border: 2px solid var(--border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   #mic-btn.listening { background: var(--accent-light); border-color: var(--accent); animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(200,75,47,0.3);} 50%{box-shadow:0 0 0 6px rgba(200,75,47,0);} }
   #mic-btn svg { pointer-events: none; }
-  #listening-label {
-    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-    background: var(--accent); color: white; padding: 0.4rem 1rem; border-radius: 16px;
-    font-size: 0.8rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap;
-  }
+  #listening-label { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 0.4rem 1rem; border-radius: 16px; font-size: 0.8rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap; }
   #listening-label.show { opacity: 1; }
   #sync-indicator { position: fixed; top: 70px; right: 12px; font-size: 0.72rem; color: var(--muted); opacity: 0; transition: opacity 0.3s; }
   #sync-indicator.show { opacity: 1; }
@@ -146,7 +109,7 @@
 
 <div id="app-screen">
   <header>
-    <div>
+    <div class="header-left">
       <h1>✎ ToDo-Liste</h1>
       <div id="header-date"></div>
     </div>
@@ -161,6 +124,22 @@
       </button>
     </div>
   </header>
+
+  <div id="day-nav">
+    <button class="day-nav-btn" id="prev-day">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
+    </button>
+    <div id="day-label">
+      <div class="day-name"></div>
+      <div class="day-sub"></div>
+    </div>
+    <button class="day-nav-btn" id="next-day">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </button>
+  </div>
+
+  <div id="past-notice">📅 Vergangener Tag — neue Aufgaben werden zum heutigen Tag hinzugefügt.</div>
+
   <div id="share-toast">Link kopiert!</div>
   <div id="listening-label">🎤 Höre zu …</div>
   <div id="sync-indicator">↻ Gespeichert</div>
@@ -184,16 +163,52 @@
 
 <script>
 const DB_ROOT = 'https://todo-liste-d024d-default-rtdb.europe-west1.firebasedatabase.app';
-const DB_TODOS = DB_ROOT + '/todos/geteilt.json';
 const DB_CONFIG = DB_ROOT + '/todos/config/passwort.json';
 
-let todos = [];
+let allDays = {};       // { "2026-04-07": { id_xxx: {}, ... }, ... }
 let currentUser = '';
+let viewDateKey = '';   // z.B. "2026-04-07"
+
+// ── Datums-Hilfsfunktionen ────────────────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function keyToDate(key) {
+  const [y,m,d] = key.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+function formatDayLabel(key) {
+  const d = keyToDate(key);
+  const today = todayKey();
+  const yesterday = offsetKey(today, -1);
+  const tomorrow = offsetKey(today, 1);
+  if (key === today) return { name: 'Heute', sub: d.toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'}) };
+  if (key === yesterday) return { name: 'Gestern', sub: d.toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'}) };
+  if (key === tomorrow) return { name: 'Morgen', sub: d.toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'}) };
+  return { name: d.toLocaleDateString('de-DE', {weekday:'long'}), sub: d.toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'}) };
+}
+
+function offsetKey(key, days) {
+  const d = keyToDate(key);
+  d.setDate(d.getDate() + days);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function dbDayUrl(key) {
+  return DB_ROOT + '/tage/' + key + '.json';
+}
+
+function dbAllUrl() {
+  return DB_ROOT + '/tage.json';
+}
 
 // ── Login ─────────────────────────────────────────────────────────────────────
-async function checkLogin() {
+function checkLogin() {
   const saved = sessionStorage.getItem('todo_user');
-  if (saved) { currentUser = saved; showApp(); return; }
+  if (saved) { currentUser = saved; showApp(); }
 }
 
 function showApp() {
@@ -201,13 +216,17 @@ function showApp() {
   document.getElementById('app-screen').classList.add('visible');
   document.getElementById('user-badge').textContent = '👤 ' + currentUser;
 
-  // Datum anzeigen
   const heute = new Date();
-  const optionen = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-  document.getElementById('header-date').textContent = heute.toLocaleDateString('de-DE', optionen);
+  document.getElementById('header-date').textContent = heute.toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
-  loadFromDB().then(render);
-  setInterval(async () => { await loadFromDB(); render(); }, 5000);
+  viewDateKey = todayKey();
+  loadAll().then(() => {
+    doMidnightRollover();
+    renderDay();
+  });
+
+  setInterval(async () => { await loadAll(); renderDay(); }, 5000);
+  scheduleMidnightCheck();
 }
 
 document.getElementById('login-btn').addEventListener('click', doLogin);
@@ -220,13 +239,10 @@ async function doLogin() {
   const err = document.getElementById('login-error');
   const loading = document.getElementById('login-loading');
   err.style.display = 'none';
-
   if (!name) { err.textContent = 'Bitte gib deinen Namen ein.'; err.style.display = 'block'; return; }
   if (!pw) { err.textContent = 'Bitte gib das Passwort ein.'; err.style.display = 'block'; return; }
-
   loading.style.display = 'block';
   document.getElementById('login-btn').disabled = true;
-
   try {
     const res = await fetch(DB_CONFIG);
     const correctPw = await res.json();
@@ -242,7 +258,6 @@ async function doLogin() {
     err.textContent = 'Verbindungsfehler. Bitte versuche es erneut.';
     err.style.display = 'block';
   }
-
   loading.style.display = 'none';
   document.getElementById('login-btn').disabled = false;
 }
@@ -254,20 +269,79 @@ function showSync() {
   setTimeout(() => el.classList.remove('show'), 1500);
 }
 
-async function loadFromDB() {
+async function loadAll() {
   try {
-    const res = await fetch(DB_TODOS);
+    const res = await fetch(dbAllUrl());
     const data = await res.json();
-    todos = data && typeof data === 'object' ? Object.values(data).sort((a,b) => b.id - a.id) : [];
+    allDays = data && typeof data === 'object' ? data : {};
   } catch(e) { console.error(e); }
 }
 
-async function saveToDB() {
-  const obj = {};
-  todos.forEach(t => { obj['id_' + t.id] = t; });
-  await fetch(DB_TODOS, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(obj) });
+async function saveDayToDB(key) {
+  const obj = allDays[key] || null;
+  await fetch(dbDayUrl(key), {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(obj)
+  });
   showSync();
 }
+
+function todosForDay(key) {
+  const day = allDays[key];
+  if (!day || typeof day !== 'object') return [];
+  return Object.values(day).sort((a,b) => b.id - a.id);
+}
+
+// ── Mitternachts-Verschiebung ─────────────────────────────────────────────────
+async function doMidnightRollover() {
+  const today = todayKey();
+  const keys = Object.keys(allDays).filter(k => k < today);
+  let changed = false;
+
+  for (const key of keys) {
+    const day = allDays[key];
+    if (!day) continue;
+    const undone = Object.values(day).filter(t => !t.done);
+    if (undone.length === 0) continue;
+
+    // Verschiebe unerledigte in den heutigen Tag
+    if (!allDays[today]) allDays[today] = {};
+    undone.forEach(t => {
+      const newId = t.id + 1; // minimal versetzt damit keine Kollision
+      allDays[today]['id_' + newId] = { ...t, id: newId, movedFrom: key };
+      delete allDays[key]['id_' + t.id];
+    });
+    changed = true;
+    await saveDayToDB(key);
+  }
+
+  if (changed) await saveDayToDB(today);
+}
+
+function scheduleMidnightCheck() {
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 5);
+  const msUntilMidnight = midnight - now;
+  setTimeout(async () => {
+    viewDateKey = todayKey();
+    await loadAll();
+    await doMidnightRollover();
+    renderDay();
+    document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    scheduleMidnightCheck();
+  }, msUntilMidnight);
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+document.getElementById('prev-day').addEventListener('click', () => {
+  viewDateKey = offsetKey(viewDateKey, -1);
+  renderDay();
+});
+document.getElementById('next-day').addEventListener('click', () => {
+  viewDateKey = offsetKey(viewDateKey, 1);
+  renderDay();
+});
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -281,14 +355,33 @@ function timeAgo(ts) {
   return `vor ${Math.floor(h/24)} Tag(en)`;
 }
 
-function render() {
-  const list = document.getElementById('todo-list');
+function renderDay() {
+  const today = todayKey();
+  const isToday = viewDateKey === today;
+  const isFuture = viewDateKey > today;
+
+  // Tagnavigation
+  const label = formatDayLabel(viewDateKey);
+  document.querySelector('#day-label .day-name').textContent = label.name;
+  document.querySelector('#day-label .day-sub').textContent = label.sub;
+  document.getElementById('next-day').disabled = isFuture;
+  document.getElementById('past-notice').style.display = (!isToday && !isFuture) ? 'block' : 'none';
+
+  // Eingabe nur für heute/morgen aktiv
+  const inputDisabled = (!isToday && !isFuture);
+  document.getElementById('text-input').disabled = inputDisabled;
+  document.getElementById('add-btn').disabled = inputDisabled;
+  document.getElementById('mic-btn').disabled = inputDisabled;
+  document.getElementById('text-input').placeholder = inputDisabled ? 'Vergangener Tag …' : 'Aufgabe eingeben …';
+
+  const todos = todosForDay(viewDateKey);
   const doneCount = todos.filter(t => t.done).length;
   document.getElementById('count-label').textContent = todos.length === 1 ? '1 Aufgabe' : `${todos.length} Aufgaben`;
-  document.getElementById('clear-done').style.display = doneCount > 0 ? 'block' : 'none';
+  document.getElementById('clear-done').style.display = (doneCount > 0 && isToday) ? 'block' : 'none';
 
+  const list = document.getElementById('todo-list');
   if (todos.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="big">🎤</div><p>Noch keine Aufgaben.<br>Tippe unten oder nutze das Mikrofon.</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="big">${isFuture ? '📅' : '🎤'}</div><p>${isFuture ? 'Noch kein Eintrag für diesen Tag.' : (isToday ? 'Noch keine Aufgaben.<br>Tippe unten oder nutze das Mikrofon.' : 'Keine Aufgaben an diesem Tag.')}</p></div>`;
     return;
   }
 
@@ -301,52 +394,69 @@ function render() {
         <svg width="11" height="11" viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,5 4.5,8.5 11,1"/></svg>
       </button>
       <div class="todo-body">
-        <div class="todo-text" contenteditable="true" data-i="${i}">${escHtml(t.text)}</div>
+        <div class="todo-text" contenteditable="${!inputDisabled}" data-i="${i}">${escHtml(t.text)}</div>
         <div class="todo-meta">
           <span class="author">${escHtml(t.author || '?')}</span> · ${timeAgo(t.id)}
+          ${t.movedFrom ? ` · verschoben von ${formatDayLabel(t.movedFrom).name}` : ''}
           ${t.done && t.doneBy ? ` · erledigt von <span class="author">${escHtml(t.doneBy)}</span>` : ''}
         </div>
       </div>
-      <button class="todo-del" data-i="${i}">×</button>`;
+      ${!inputDisabled ? `<button class="todo-del" data-i="${i}">×</button>` : ''}`;
     list.appendChild(item);
   });
 
   list.querySelectorAll('.todo-check').forEach(btn => {
     btn.addEventListener('click', async e => {
       const i = +e.currentTarget.dataset.i;
-      todos[i].done = !todos[i].done;
-      todos[i].doneBy = todos[i].done ? currentUser : null;
-      render(); await saveToDB();
+      const t = todos[i];
+      const key = 'id_' + t.id;
+      allDays[viewDateKey][key].done = !t.done;
+      allDays[viewDateKey][key].doneBy = !t.done ? currentUser : null;
+      renderDay(); await saveDayToDB(viewDateKey);
     });
   });
   list.querySelectorAll('.todo-del').forEach(btn => {
     btn.addEventListener('click', async e => {
       const i = +e.currentTarget.dataset.i;
-      todos.splice(i, 1); render(); await saveToDB();
+      const t = todos[i];
+      delete allDays[viewDateKey]['id_' + t.id];
+      renderDay(); await saveDayToDB(viewDateKey);
     });
   });
   list.querySelectorAll('.todo-text').forEach(div => {
     div.addEventListener('blur', async e => {
       const i = +e.currentTarget.dataset.i;
+      const t = todos[i];
       const newText = e.currentTarget.textContent.trim();
-      if (!newText) todos.splice(i, 1); else todos[i].text = newText;
-      render(); await saveToDB();
+      if (!newText) { delete allDays[viewDateKey]['id_' + t.id]; }
+      else { allDays[viewDateKey]['id_' + t.id].text = newText; }
+      renderDay(); await saveDayToDB(viewDateKey);
     });
     div.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } });
   });
 }
 
-// ── Aufgabe hinzufügen ────────────────────────────────────────────────────────
+// ── Aufgabe hinzufügen (immer zum heutigen Tag) ───────────────────────────────
 async function addTodo(text) {
   text = text.trim(); if (!text) return;
-  todos.unshift({ text, done: false, id: Date.now(), author: currentUser });
-  render(); await saveToDB();
+  const key = todayKey();
+  if (!allDays[key]) allDays[key] = {};
+  const id = Date.now();
+  allDays[key]['id_' + id] = { text, done: false, id, author: currentUser };
+  viewDateKey = key;
+  renderDay(); await saveDayToDB(key);
 }
 
 const input = document.getElementById('text-input');
 document.getElementById('add-btn').addEventListener('click', () => { addTodo(input.value); input.value = ''; });
 input.addEventListener('keydown', e => { if (e.key === 'Enter') { addTodo(input.value); input.value = ''; } });
-document.getElementById('clear-done').addEventListener('click', async () => { todos = todos.filter(t => !t.done); render(); await saveToDB(); });
+
+document.getElementById('clear-done').addEventListener('click', async () => {
+  const day = allDays[viewDateKey];
+  if (!day) return;
+  Object.keys(day).forEach(k => { if (day[k].done) delete day[k]; });
+  renderDay(); await saveDayToDB(viewDateKey);
+});
 
 document.getElementById('share-btn').addEventListener('click', () => {
   const url = 'https://renacuaja.github.io/todo-liste/';
