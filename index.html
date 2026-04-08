@@ -103,6 +103,36 @@
   #listening-label.show { opacity: 1; }
   #sync-indicator { position: fixed; top: 70px; right: 12px; font-size: 0.72rem; color: var(--muted); opacity: 0; transition: opacity 0.3s; }
   #sync-indicator.show { opacity: 1; }
+
+  /* Teilnehmer-Zuweisung */
+  .assignee-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 500; padding: 1px 7px 1px 5px; border-radius: 10px; }
+  .assignee-avatar { width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 500; flex-shrink: 0; }
+  .assign-select { font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 0.35rem 0.6rem; outline: none; cursor: pointer; max-width: 130px; }
+  .assign-select:focus { border-color: var(--ink); }
+  #member-panel { background: var(--card); border-top: 1px solid var(--border); padding: 0.5rem 1rem 0.4rem; }
+  #member-panel-inner { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .member-filter-btn { display: inline-flex; align-items: center; gap: 4px; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 3px 9px; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .member-filter-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+  .member-filter-btn .sm-avatar { width: 14px; height: 14px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 500; }
+  #manage-members-btn { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; background: none; border: 1px dashed var(--border); border-radius: 14px; padding: 3px 9px; cursor: pointer; color: var(--muted); }
+  #manage-members-btn:active { background: var(--bg); }
+
+  /* Teilnehmer-Modal */
+  #member-modal-bg { position: fixed; inset: 0; background: rgba(26,24,20,0.45); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
+  #member-modal-bg.hidden { display: none; }
+  #member-modal { background: var(--card); border-radius: 18px 18px 0 0; width: 100%; max-width: 480px; padding: 1.2rem 1.2rem 2rem; }
+  #member-modal h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 400; margin-bottom: 1rem; }
+  .member-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .member-row:last-of-type { border-bottom: none; }
+  .member-row .m-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 500; flex-shrink: 0; }
+  .member-row .m-name { flex: 1; font-size: 0.9rem; }
+  .member-row .m-del { background: none; border: none; color: var(--border); font-size: 1.1rem; cursor: pointer; padding: 0 4px; }
+  .member-row .m-del:active { color: var(--accent); }
+  #new-member-row { display: flex; gap: 8px; margin-top: 10px; }
+  #new-member-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.55rem 0.8rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; }
+  #new-member-input:focus { border-color: var(--ink); }
+  #add-member-btn { background: var(--ink); color: white; border: none; border-radius: 10px; padding: 0.55rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+  #close-modal-btn { display: block; width: 100%; margin-top: 12px; background: none; border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; cursor: pointer; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -164,11 +194,33 @@
   </div>
   <div id="todo-list"></div>
 
+  <!-- Teilnehmer-Modal -->
+  <div id="member-modal-bg" class="hidden">
+    <div id="member-modal">
+      <h3>Teilnehmer verwalten</h3>
+      <div id="member-list-modal"></div>
+      <div id="new-member-row">
+        <input type="text" id="new-member-input" placeholder="Name eingeben …" maxlength="30">
+        <button id="add-member-btn">Hinzufügen</button>
+      </div>
+      <button id="close-modal-btn">Schließen</button>
+    </div>
+  </div>
+
   <div id="bottom-bar">
+    <div id="member-panel">
+      <div id="member-panel-inner">
+        <button class="member-filter-btn active" data-filter="">Alle</button>
+        <button id="manage-members-btn">+ Teilnehmer</button>
+      </div>
+    </div>
     <div id="keyword-legend">
       <p>🔁 Codewörter: <span class="kw-chip">Täglich</span> <span class="kw-chip">Zweitägig</span> <span class="kw-chip">Wöchentlich</span> <span class="kw-chip">Montags</span> <span class="kw-chip">Dienstags</span> <span class="kw-chip">Mittwochs</span> <span class="kw-chip">Donnerstags</span> <span class="kw-chip">Freitags</span> <span class="kw-chip">Samstags</span> <span class="kw-chip">Sonntags</span> — jeweils gefolgt von der Aufgabe</p>
     </div>
     <div class="input-row">
+      <select id="assign-select" class="assign-select" title="Zuweisen an …">
+        <option value="">Für alle</option>
+      </select>
       <button id="mic-btn" title="Spracheingabe">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="9" y="2" width="6" height="11" rx="3"/>
@@ -369,6 +421,8 @@ function showApp() {
   document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
   viewDateKey = todayKey();
   loadAll().then(async () => {
+    await loadMembers();
+    renderMemberPanel();
     await doMidnightRollover();
     ensureRecurringForDay(viewDateKey);
     await saveDayToDB(viewDateKey);
@@ -439,7 +493,8 @@ function renderDay() {
   document.getElementById('mic-btn').disabled = inputDisabled;
   document.getElementById('text-input').placeholder = inputDisabled ? 'Vergangener Tag …' : 'Aufgabe oder: täglich Aufgabe …';
 
-  const todos = todosForDay(viewDateKey);
+  const allTodos = todosForDay(viewDateKey);
+  const todos = activeFilter ? allTodos.filter(t => t.assignee === activeFilter) : allTodos;
   const doneCount = todos.filter(t => t.done).length;
   document.getElementById('count-label').textContent = todos.length === 1 ? '1 Aufgabe' : `${todos.length} Aufgaben`;
   document.getElementById('clear-done').style.display = (doneCount > 0 && isToday) ? 'block' : 'none';
@@ -466,6 +521,7 @@ function renderDay() {
           ${!t.recurId ? ` · ${timeAgo(t.id)}` : ''}
           ${t.movedFrom ? ` · verschoben von ${formatDayLabel(t.movedFrom).name}` : ''}
           ${t.done && t.doneBy ? ` · erledigt von <span class="author">${escHtml(t.doneBy)}</span>` : ''}
+          ${(()=>{ if(!t.assignee) return ''; const m=members.find(m=>m.id===t.assignee); if(!m) return ''; const c=m.color; return ` · <span class="assignee-badge" style="background:${c.bg};color:${c.text}"><span class="assignee-avatar" style="background:${c.bg};color:${c.text}">${memberInitials(m.name)}</span>${escHtml(m.name)}</span>`; })()}
         </div>
       </div>
       ${!inputDisabled ? `<button class="todo-del" data-i="${i}" data-recurid="${t.recurId||''}">×</button>` : ''}`;
@@ -545,20 +601,19 @@ async function addTodo(text) {
   text = capitalize(text.trim()); if (!text) return;
   const key = todayKey();
   if (!allDays[key]) allDays[key] = {};
+  const assignee = document.getElementById('assign-select').value || null;
 
   const recur = parseRecurrence(text);
   if (recur) {
-    // Wiederkehrende Aufgabe anlegen
     const rid = Date.now();
-    const rt = { rid, taskText: recur.taskText, type: recur.type, label: recur.label, author: currentUser, createdOnKey: key, days: recur.days || null, n: recur.n || null };
+    const rt = { rid, taskText: recur.taskText, type: recur.type, label: recur.label, author: currentUser, createdOnKey: key, days: recur.days || null, n: recur.n || null, assignee };
     recurTasks.push(rt);
     await saveRecurToDB();
-    // Für heute direkt eintragen
     const id = rid;
-    allDays[key]['id_' + id] = { text: recur.taskText, done: false, id, author: currentUser, recurId: rid, recurLabel: recur.label };
+    allDays[key]['id_' + id] = { text: recur.taskText, done: false, id, author: currentUser, recurId: rid, recurLabel: recur.label, assignee };
   } else {
     const id = Date.now();
-    allDays[key]['id_' + id] = { text, done: false, id, author: currentUser };
+    allDays[key]['id_' + id] = { text, done: false, id, author: currentUser, assignee };
   }
 
   viewDateKey = key;
@@ -609,6 +664,116 @@ else {
 
 // ── Firebase Regeln Hinweis ───────────────────────────────────────────────────
 // Benötigt in Firebase: "wiederkehrend": { ".read": true, ".write": true }
+// Benötigt in Firebase: "teilnehmer": { ".read": true, ".write": true }
+
+// ── Teilnehmer ────────────────────────────────────────────────────────────────
+const DB_MEMBERS = DB_ROOT + '/teilnehmer.json';
+const MEMBER_COLORS = [
+  {bg:'#F5DDD8',text:'#C84B2F'},{bg:'#E6F1FB',text:'#185FA5'},{bg:'#E1F5EE',text:'#085041'},
+  {bg:'#EEEDFE',text:'#3C3489'},{bg:'#FAEEDA',text:'#633806'},{bg:'#EAF3DE',text:'#27500A'},
+  {bg:'#FBEAF0',text:'#72243E'},{bg:'#FCEBEB',text:'#791F1F'}
+];
+let members = [];
+let activeFilter = '';
+
+function memberInitials(name) { return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function memberColor(id) { const m = members.find(m=>m.id===id); return m ? m.color : {bg:'#E2DED6',text:'#8A8680'}; }
+
+async function loadMembers() {
+  try {
+    const res = await fetch(DB_MEMBERS);
+    const data = await res.json();
+    members = data && typeof data === 'object' ? Object.values(data) : [];
+  } catch(e) { members = []; }
+}
+async function saveMembersToDB() {
+  const obj = {};
+  members.forEach(m => { obj['m_' + m.id] = m; });
+  await fetch(DB_MEMBERS, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
+}
+
+function renderMemberPanel() {
+  const inner = document.getElementById('member-panel-inner');
+  inner.innerHTML = `<button class="member-filter-btn ${activeFilter===''?'active':''}" data-filter="">Alle</button>` +
+    members.map(m => {
+      const c = m.color;
+      return `<button class="member-filter-btn ${activeFilter===m.id?'active':''}" data-filter="${m.id}">
+        <span class="sm-avatar" style="background:${c.bg};color:${c.text}">${memberInitials(m.name)}</span>
+        ${m.name}
+      </button>`;
+    }).join('') +
+    `<button id="manage-members-btn">+ Teilnehmer</button>`;
+
+  inner.querySelectorAll('.member-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeFilter = btn.dataset.filter;
+      renderMemberPanel();
+      renderDay();
+    });
+  });
+  document.getElementById('manage-members-btn').addEventListener('click', openMemberModal);
+
+  // Update assign-select
+  const sel = document.getElementById('assign-select');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Für alle</option>' +
+    members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  sel.value = prev && members.find(m=>m.id===prev) ? prev : '';
+}
+
+function renderMemberModal() {
+  const list = document.getElementById('member-list-modal');
+  if (!members.length) {
+    list.innerHTML = '<p style="font-size:0.82rem;color:var(--muted);padding:8px 0">Noch keine Teilnehmer hinzugefügt.</p>';
+    return;
+  }
+  list.innerHTML = members.map(m => {
+    const c = m.color;
+    return `<div class="member-row">
+      <div class="m-avatar" style="background:${c.bg};color:${c.text}">${memberInitials(m.name)}</div>
+      <span class="m-name">${m.name}</span>
+      <button class="m-del" data-id="${m.id}">×</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.m-del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      members = members.filter(m => m.id !== btn.dataset.id);
+      if (activeFilter === btn.dataset.id) activeFilter = '';
+      await saveMembersToDB();
+      renderMemberModal();
+      renderMemberPanel();
+      renderDay();
+    });
+  });
+}
+
+function openMemberModal() {
+  renderMemberModal();
+  document.getElementById('member-modal-bg').classList.remove('hidden');
+  document.getElementById('new-member-input').focus();
+}
+
+document.getElementById('close-modal-btn').addEventListener('click', () => {
+  document.getElementById('member-modal-bg').classList.add('hidden');
+});
+document.getElementById('member-modal-bg').addEventListener('click', e => {
+  if (e.target === document.getElementById('member-modal-bg'))
+    document.getElementById('member-modal-bg').classList.add('hidden');
+});
+
+async function addMember() {
+  const input = document.getElementById('new-member-input');
+  const name = input.value.trim();
+  if (!name) return;
+  const colorIdx = members.length % MEMBER_COLORS.length;
+  members.push({ id: 'm' + Date.now(), name, color: MEMBER_COLORS[colorIdx] });
+  input.value = '';
+  await saveMembersToDB();
+  renderMemberModal();
+  renderMemberPanel();
+}
+document.getElementById('add-member-btn').addEventListener('click', addMember);
+document.getElementById('new-member-input').addEventListener('keydown', e => { if(e.key==='Enter') addMember(); });
 
 checkLogin();
 </script>
