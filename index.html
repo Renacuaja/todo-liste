@@ -222,7 +222,7 @@
       </div>
     </div>
     <div id="keyword-legend">
-      <p>🔁 Codewörter: <span class="kw-chip">Täglich</span> <span class="kw-chip">Zweitägig</span> <span class="kw-chip">Wöchentlich</span> <span class="kw-chip">Montags</span> <span class="kw-chip">Dienstags</span> <span class="kw-chip">Mittwochs</span> <span class="kw-chip">Donnerstags</span> <span class="kw-chip">Freitags</span> <span class="kw-chip">Samstags</span> <span class="kw-chip">Sonntags</span> — jeweils gefolgt von der Aufgabe</p>
+      <p>🔁 Codewörter: <span class="kw-chip">Morgen</span> <span class="kw-chip">Täglich</span> <span class="kw-chip">Zweitägig</span> <span class="kw-chip">Wöchentlich</span> <span class="kw-chip">Montags</span> <span class="kw-chip">Dienstags</span> <span class="kw-chip">Mittwochs</span> <span class="kw-chip">Donnerstags</span> <span class="kw-chip">Freitags</span> <span class="kw-chip">Samstags</span> <span class="kw-chip">Sonntags</span> — jeweils gefolgt von der Aufgabe</p>
     </div>
     <div class="input-row">
       <button id="mic-btn" title="Spracheingabe">
@@ -302,6 +302,11 @@ function parseRecurrence(text) {
     const taskText = text.trim().split(/\s+/).slice(1).join(' ');
     if (!taskText) return null;
     return { type: 'weekly', label: 'Wöchentlich', taskText: capitalize(taskText) };
+  }
+  if (words[0] === 'morgen') {
+    const taskText = text.trim().split(/\s+/).slice(1).join(' ');
+    if (!taskText) return null;
+    return { type: 'tomorrow', label: 'Morgen', taskText: capitalize(taskText) };
   }
   return null;
 }
@@ -639,10 +644,19 @@ function renderDay() {
 async function addTodo(text) {
   text = capitalize(text.trim()); if (!text) return;
   const key = todayKey();
-  if (!allDays[key]) allDays[key] = {};
   const assignee = null;
 
   const recur = parseRecurrence(text);
+  if (recur && recur.type === 'tomorrow') {
+    const tomorrowKey = offsetKey(key, 1);
+    if (!allDays[tomorrowKey]) allDays[tomorrowKey] = {};
+    const id = Date.now();
+    allDays[tomorrowKey]['id_' + id] = { text: recur.taskText, done: false, id, author: currentUser, assignee };
+    renderDay(); await saveDayToDB(tomorrowKey);
+    return;
+  }
+
+  if (!allDays[key]) allDays[key] = {};
   if (recur) {
     const rid = Date.now();
     const rt = { rid, taskText: recur.taskText, type: recur.type, label: recur.label, author: currentUser, createdOnKey: key, days: recur.days || null, n: recur.n || null, assignee };
