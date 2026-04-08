@@ -107,8 +107,15 @@
   /* Teilnehmer-Zuweisung */
   .assignee-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 500; padding: 1px 7px 1px 5px; border-radius: 10px; }
   .assignee-avatar { width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 500; flex-shrink: 0; }
-  .assign-select { font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 0.35rem 0.6rem; outline: none; cursor: pointer; max-width: 130px; }
-  .assign-select:focus { border-color: var(--ink); }
+  .assign-popup { position: fixed; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); z-index: 50; overflow: hidden; min-width: 160px; }
+  .assign-popup button { display: block; width: 100%; text-align: left; padding: 0.6rem 1rem; background: none; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; cursor: pointer; color: var(--ink); display: flex; align-items: center; gap: 7px; }
+  .assign-popup button:hover { background: var(--bg); }
+  .assign-popup button.unassign { color: var(--muted); }
+  .assign-popup .popup-divider { height: 1px; background: var(--border); }
+  .assignee-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 500; padding: 2px 7px 2px 5px; border-radius: 10px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .assignee-btn:hover { opacity: 0.8; }
+  .assign-placeholder { font-size: 0.72rem; color: var(--border); background: none; border: 1px dashed var(--border); border-radius: 10px; padding: 1px 7px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .assign-placeholder:hover { border-color: var(--muted); color: var(--muted); }
   #member-panel { background: var(--card); border-top: 1px solid var(--border); padding: 0.5rem 1rem 0.4rem; }
   #member-panel-inner { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .member-filter-btn { display: inline-flex; align-items: center; gap: 4px; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 3px 9px; cursor: pointer; color: var(--muted); transition: all 0.15s; }
@@ -218,9 +225,6 @@
       <p>🔁 Codewörter: <span class="kw-chip">Täglich</span> <span class="kw-chip">Zweitägig</span> <span class="kw-chip">Wöchentlich</span> <span class="kw-chip">Montags</span> <span class="kw-chip">Dienstags</span> <span class="kw-chip">Mittwochs</span> <span class="kw-chip">Donnerstags</span> <span class="kw-chip">Freitags</span> <span class="kw-chip">Samstags</span> <span class="kw-chip">Sonntags</span> — jeweils gefolgt von der Aufgabe</p>
     </div>
     <div class="input-row">
-      <select id="assign-select" class="assign-select" title="Zuweisen an …">
-        <option value="">Für alle</option>
-      </select>
       <button id="mic-btn" title="Spracheingabe">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="9" y="2" width="6" height="11" rx="3"/>
@@ -521,7 +525,7 @@ function renderDay() {
           ${!t.recurId ? ` · ${timeAgo(t.id)}` : ''}
           ${t.movedFrom ? ` · verschoben von ${formatDayLabel(t.movedFrom).name}` : ''}
           ${t.done && t.doneBy ? ` · erledigt von <span class="author">${escHtml(t.doneBy)}</span>` : ''}
-          ${(()=>{ if(!t.assignee) return ''; const m=members.find(m=>m.id===t.assignee); if(!m) return ''; const c=m.color; return ` · <span class="assignee-badge" style="background:${c.bg};color:${c.text}"><span class="assignee-avatar" style="background:${c.bg};color:${c.text}">${memberInitials(m.name)}</span>${escHtml(m.name)}</span>`; })()}
+          ${(()=>{ if(!t.assignee) { if(inputDisabled) return ''; return ` · <button class="assign-placeholder" data-taskid="${t.id}">+ zuweisen</button>`; } const m=members.find(m=>m.id===t.assignee); if(!m) return ''; const c=m.color; return ` · <button class="assignee-btn" data-taskid="${t.id}" style="background:${c.bg};color:${c.text}"><span class="assignee-avatar" style="background:${c.bg};color:${c.text}">${memberInitials(m.name)}</span>${escHtml(m.name)}</button>`; })()}
         </div>
       </div>
       ${!inputDisabled ? `<button class="todo-del" data-i="${i}" data-recurid="${t.recurId||''}">×</button>` : ''}`;
@@ -583,6 +587,41 @@ function renderDay() {
       }), 50);
     });
   });
+  list.querySelectorAll('.assignee-btn, .assign-placeholder').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const taskId = +btn.dataset.taskid;
+      document.querySelectorAll('.assign-popup, .del-popup').forEach(p => p.remove());
+      const popup = document.createElement('div');
+      popup.className = 'assign-popup';
+      popup.innerHTML = members.map(m => {
+        const c = m.color;
+        return `<button data-mid="${m.id}" style="display:flex;align-items:center;gap:7px;">
+          <span style="width:20px;height:20px;border-radius:50%;background:${c.bg};color:${c.text};display:inline-flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:500;flex-shrink:0">${memberInitials(m.name)}</span>
+          ${escHtml(m.name)}
+        </button>`;
+      }).join('') +
+      (members.length ? '<div class="popup-divider"></div>' : '') +
+      `<button class="unassign" data-mid="">— Zuweisung aufheben</button>`;
+      const rect = btn.getBoundingClientRect();
+      popup.style.top = (rect.bottom + 4) + 'px';
+      popup.style.left = rect.left + 'px';
+      document.body.appendChild(popup);
+      popup.querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', async () => {
+          popup.remove();
+          const mid = b.dataset.mid || null;
+          if (allDays[viewDateKey] && allDays[viewDateKey]['id_' + taskId]) {
+            allDays[viewDateKey]['id_' + taskId].assignee = mid;
+            renderDay(); await saveDayToDB(viewDateKey);
+          }
+        });
+      });
+      setTimeout(() => document.addEventListener('click', function handler() {
+        popup.remove(); document.removeEventListener('click', handler);
+      }), 50);
+    });
+  });
   list.querySelectorAll('.todo-text[contenteditable="true"]').forEach(div => {
     div.addEventListener('blur', async e => {
       const i = +e.currentTarget.dataset.i;
@@ -601,7 +640,7 @@ async function addTodo(text) {
   text = capitalize(text.trim()); if (!text) return;
   const key = todayKey();
   if (!allDays[key]) allDays[key] = {};
-  const assignee = document.getElementById('assign-select').value || null;
+  const assignee = null;
 
   const recur = parseRecurrence(text);
   if (recur) {
@@ -712,13 +751,6 @@ function renderMemberPanel() {
     });
   });
   document.getElementById('manage-members-btn').addEventListener('click', openMemberModal);
-
-  // Update assign-select
-  const sel = document.getElementById('assign-select');
-  const prev = sel.value;
-  sel.innerHTML = '<option value="">Für alle</option>' +
-    members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
-  sel.value = prev && members.find(m=>m.id===prev) ? prev : '';
 }
 
 function renderMemberModal() {
