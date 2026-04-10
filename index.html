@@ -715,8 +715,7 @@ else {
     const recur = parseRecurrence(transcript);
     if (recur) { addTodo(transcript); return; }
     // Sonst splitten
-    const parts = transcript.split(/[,;]/).map(s => s.trim()).filter(Boolean);
-    parts.forEach(p => addTodo(p));
+    addTodo(transcript);
   };
 }
 
