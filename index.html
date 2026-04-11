@@ -528,7 +528,7 @@ document.getElementById('login-newlist-toggle').addEventListener('click', () => 
 });
 
 async function checkLogin() {
-  const savedList = sessionStorage.getItem('todo_list');
+  const savedList = null;
   if (savedList) document.getElementById('login-listname').value = savedList;
 }
 
@@ -589,10 +589,10 @@ async function doLogin() {
   activeFilter = '';
 
   // Session löschen falls andere Liste
-  if (sessionStorage.getItem('todo_list') !== currentList) {
-    sessionStorage.removeItem('todo_user');
-    sessionStorage.removeItem('todo_isadmin');
-    sessionStorage.removeItem('todo_list');
+  if (null !== currentList) {
+    // session removed;
+    // session removed;
+    // session removed;
   }
 
   loading.style.display = 'block';
@@ -611,9 +611,9 @@ async function doLogin() {
       await fetch(dbConfig(), { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(pw) });
       currentUser = name;
       isAdmin = true;
-      sessionStorage.setItem('todo_user', name);
-      sessionStorage.setItem('todo_isadmin', 'true');
-      sessionStorage.setItem('todo_list', currentList);
+      // session removed;
+      // session removed;
+      // session removed;
       showApp();
       // Admin-Setup-Banner anzeigen
       document.getElementById('admin-setup-banner').style.display = 'block';
@@ -643,9 +643,9 @@ async function doLogin() {
       else if (pw === correctPw) {
         currentUser = name;
         isAdmin = false;
-        sessionStorage.setItem('todo_user', name);
-        sessionStorage.setItem('todo_isadmin', 'false');
-        sessionStorage.setItem('todo_list', currentList);
+        // session removed;
+        // session removed;
+        // session removed;
         showApp();
         if (!adminHash) document.getElementById('admin-setup-banner').style.display = 'block';
       } else if (adminHash) {
@@ -653,9 +653,9 @@ async function doLogin() {
         if (enteredHash === adminHash) {
           currentUser = name;
           isAdmin = true;
-          sessionStorage.setItem('todo_user', name);
-          sessionStorage.setItem('todo_isadmin', 'true');
-          sessionStorage.setItem('todo_list', currentList);
+          // session removed;
+          // session removed;
+          // session removed;
           showApp();
         } else {
           err.textContent = 'Falsches Losungswort. Bitte versuche es erneut.'; err.style.display = 'block';
@@ -1004,7 +1004,7 @@ document.getElementById('admin-setup-save').addEventListener('click', async () =
     const url = isLegacy() ? dbAdminPwLegacy() : dbAdminPw();
     await fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(hash) });
     isAdmin = true;
-    sessionStorage.setItem('todo_isadmin', 'true');
+    // session removed;
     document.getElementById('settings-btn').style.display = 'flex';
     document.getElementById('admin-setup-banner').style.display = 'none';
   } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
