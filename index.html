@@ -150,11 +150,11 @@
     <p>Bitte melde dich an, um Zugang zur Liste zu erhalten.</p>
     <label>Dein Name</label>
     <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="name">
-    <label>Passwort</label>
+    <label>Losungswort</label>
     <input type="password" id="login-pw" placeholder="••••••••">
     <button id="login-btn">Anmelden</button>
     <div id="login-error"></div>
-    <div id="login-loading">Prüfe Passwort …</div>
+    <div id="login-loading">Prüfe Losungswort …</div>
   </div>
 </div>
 
@@ -462,14 +462,14 @@ async function doLogin() {
   const loading = document.getElementById('login-loading');
   err.style.display = 'none';
   if (!name) { err.textContent = 'Bitte gib deinen Namen ein.'; err.style.display = 'block'; return; }
-  if (!pw) { err.textContent = 'Bitte gib das Passwort ein.'; err.style.display = 'block'; return; }
+  if (!pw) { err.textContent = 'Bitte gib das Losungswort ein.'; err.style.display = 'block'; return; }
   loading.style.display = 'block';
   document.getElementById('login-btn').disabled = true;
   try {
     const res = await fetch(DB_CONFIG);
     const correctPw = await res.json();
     if (pw === correctPw) { currentUser = name; sessionStorage.setItem('todo_user', name); showApp(); }
-    else { err.textContent = 'Falsches Passwort. Bitte versuche es erneut.'; err.style.display = 'block'; }
+    else { err.textContent = 'Falsches Losungswort. Bitte versuche es erneut.'; err.style.display = 'block'; }
   } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
   loading.style.display = 'none';
   document.getElementById('login-btn').disabled = false;
