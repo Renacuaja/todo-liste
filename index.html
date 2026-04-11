@@ -164,7 +164,7 @@
 
 <div id="login-screen">
   <div class="login-card">
-    <h2>✎ ToDo-Liste</h2>
+    <h2>Einfache ToDo-Liste für den Alltag</h2>
     <p>Bitte melde dich an, um Zugang zur Liste zu erhalten.</p>
     <label>Dein Name</label>
     <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="name">
@@ -478,7 +478,11 @@ async function checkLogin() {
   const saved = sessionStorage.getItem('todo_user');
   if (saved) {
     currentUser = saved;
-    try { const r = await fetch(DB_ADMIN_NAME); adminName = await r.json(); } catch(e) {}
+    try {
+      const r = await fetch(DB_ADMIN_NAME);
+      const data = await r.json();
+      adminName = data || null;
+    } catch(e) { adminName = null; }
     showApp();
   }
 }
@@ -487,7 +491,7 @@ function showApp() {
   document.getElementById('app-screen').classList.add('visible');
   document.getElementById('user-badge').textContent = '👤 ' + currentUser;
   document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  document.getElementById('settings-btn').style.display = (currentUser === adminName) ? 'flex' : 'none';
+  document.getElementById('settings-btn').style.display = (adminName && currentUser.toLowerCase() === adminName.toLowerCase()) ? 'flex' : 'none';
   viewDateKey = todayKey();
   loadAll().then(async () => {
     await loadMembers();
@@ -726,8 +730,12 @@ function renderDay() {
 }
 
 // ── Aufgabe hinzufügen ────────────────────────────────────────────────────────
+function ensurePeriod(text) {
+  if (!text) return text;
+  return /[.!?…]$/.test(text) ? text : text + '.';
+}
 async function addTodo(text) {
-  text = capitalize(text.trim()); if (!text) return;
+  text = ensurePeriod(capitalize(text.trim())); if (!text) return;
   const key = todayKey();
   const assignee = null;
 
@@ -776,6 +784,27 @@ document.getElementById('share-btn').addEventListener('click', () => {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500);
 });
 
+// ── KI-Korrektur für Spracheingabe ───────────────────────────────────────────
+async function correctTranscript(text) {
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: `Korrigiere diesen per Sprache eingegebenen deutschen Text. Behalte den Inhalt exakt bei. Korrigiere nur: Rechtschreibfehler durch Spracherkennung, fehlende Großschreibung von Nomen (deutsche Substantive werden großgeschrieben), fehlende Punkte in Abkürzungen (zB → z.B., usw → usw., etc), Datumsangaben immer mit Punkt nach dem Tag und Monat (22.4 → 22.4., 3.10 → 3.10.), offensichtliche Erkennungsfehler. Gib NUR den korrigierten Text zurück, ohne Erklärung, ohne Anführungszeichen: ${text}`
+        }]
+      })
+    });
+    const data = await response.json();
+    const corrected = data.content?.[0]?.text?.trim();
+    return corrected || text;
+  } catch(e) { return text; }
+}
+
 // ── Spracheingabe ─────────────────────────────────────────────────────────────
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('mic-btn');
@@ -789,13 +818,12 @@ else {
   recog.onstart = () => { listening=true; micBtn.classList.add('listening'); listeningLabel.classList.add('show'); micBtn.querySelector('svg').style.stroke='#C84B2F'; };
   recog.onend = () => { listening=false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); micBtn.querySelector('svg').style.stroke='#1A1814'; };
   recog.onerror = () => { listening=false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); };
-  recog.onresult = e => {
+  recog.onresult = async e => {
     const transcript = e.results[0][0].transcript.trim();
-    // Versuche zuerst als ganzes (für Codewörter + Aufgabe in einem Satz)
     const recur = parseRecurrence(transcript);
     if (recur) { addTodo(transcript); return; }
-    // Sonst splitten
-    addTodo(transcript);
+    const corrected = await correctTranscript(transcript);
+    addTodo(corrected);
   };
 }
 
