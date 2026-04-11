@@ -295,11 +295,13 @@
 const DB_ROOT = 'https://todo-liste-d024d-default-rtdb.europe-west1.firebasedatabase.app';
 const DB_CONFIG = DB_ROOT + '/todos/config/passwort.json';
 const DB_RECUR = DB_ROOT + '/wiederkehrend.json';
+const DB_ADMIN_NAME = DB_ROOT + '/todos/config/adminname.json';
 
 let allDays = {};
-let recurTasks = [];   // Master-Liste wiederkehrender Aufgaben
+let recurTasks = [];
 let currentUser = '';
 let viewDateKey = '';
+let adminName = null;
 
 // ── Datumshilfen ──────────────────────────────────────────────────────────────
 function todayKey() {
@@ -472,15 +474,20 @@ function scheduleMidnightCheck() {
 }
 
 // ── Login ─────────────────────────────────────────────────────────────────────
-function checkLogin() {
+async function checkLogin() {
   const saved = sessionStorage.getItem('todo_user');
-  if (saved) { currentUser = saved; showApp(); }
+  if (saved) {
+    currentUser = saved;
+    try { const r = await fetch(DB_ADMIN_NAME); adminName = await r.json(); } catch(e) {}
+    showApp();
+  }
 }
 function showApp() {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app-screen').classList.add('visible');
   document.getElementById('user-badge').textContent = '👤 ' + currentUser;
   document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('settings-btn').style.display = (currentUser === adminName) ? 'flex' : 'none';
   viewDateKey = todayKey();
   loadAll().then(async () => {
     await loadMembers();
@@ -519,10 +526,25 @@ async function doLogin() {
   loading.style.display = 'block';
   document.getElementById('login-btn').disabled = true;
   try {
-    const res = await fetch(DB_CONFIG);
-    const correctPw = await res.json();
-    if (pw === correctPw) { currentUser = name; sessionStorage.setItem('todo_user', name); showApp(); }
-    else { err.textContent = 'Falsches Losungswort. Bitte versuche es erneut.'; err.style.display = 'block'; }
+    const [pwRes, adminRes] = await Promise.all([fetch(DB_CONFIG), fetch(DB_ADMIN_NAME)]);
+    const correctPw = await pwRes.json();
+    const storedAdmin = await adminRes.json();
+
+    if (pw === correctPw) {
+      currentUser = name;
+      sessionStorage.setItem('todo_user', name);
+
+      // Erster Login → diesen Nutzer als Admin speichern
+      if (!storedAdmin) {
+        await fetch(DB_ADMIN_NAME, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(name) });
+        adminName = name;
+      } else {
+        adminName = storedAdmin;
+      }
+      showApp();
+    } else {
+      err.textContent = 'Falsches Losungswort. Bitte versuche es erneut.'; err.style.display = 'block';
+    }
   } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
   loading.style.display = 'none';
   document.getElementById('login-btn').disabled = false;
