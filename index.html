@@ -622,8 +622,10 @@ async function doLogin() {
       const configUrl = isLegacy() ? dbConfigLegacy() : dbConfig();
       const adminUrl  = isLegacy() ? dbAdminPwLegacy() : dbAdminPw();
       
-      // DEBUG: Zeige welche URL abgefragt wird
-      alert('DEBUG: Prüfe URL: ' + configUrl + '\nListe: ' + currentList + '\nIsLegacy: ' + isLegacy());
+      // DEBUG: Zeige welche URL abgefragt wird und was Firebase zurückgibt
+      const debugRes = await fetch(configUrl);
+      const debugText = await debugRes.text();
+      alert('DEBUG:\nURL: ' + configUrl + '\nFirebase Antwort: ' + debugText + '\nIsLegacy: ' + isLegacy());
       
       const [pwRes, adminRes] = await Promise.all([fetch(configUrl), fetch(adminUrl)]);
       
