@@ -532,13 +532,14 @@ async function checkLogin() {
   const savedAdmin = sessionStorage.getItem('todo_isadmin');
   const savedList = sessionStorage.getItem('todo_list');
   if (saved && savedList) {
+    // Nur automatisch einloggen wenn Session noch aktiv
     currentUser = saved;
     currentList = savedList;
     isAdmin = savedAdmin === 'true';
-    // Session-Liste im Login-Feld vorausfüllen
-    document.getElementById('login-listname').value = savedList;
     showApp();
   }
+  // Immer den zuletzt genutzten Listen-Namen vorausfüllen
+  if (savedList) document.getElementById('login-listname').value = savedList;
 }
 
 function showApp() {
@@ -590,7 +591,13 @@ async function doLogin() {
 
   // Listen-Name normalisieren
   currentList = listRaw.toLowerCase().replace(/\s+/g, '-');
-  
+
+  // Daten der vorherigen Liste löschen
+  allDays = {};
+  recurTasks = [];
+  members = [];
+  activeFilter = '';
+
   // Session löschen falls andere Liste
   if (sessionStorage.getItem('todo_list') !== currentList) {
     sessionStorage.removeItem('todo_user');
