@@ -191,10 +191,6 @@
     </div>
     <div class="header-right">
       <span id="user-badge"></span>
-      <button id="switch-list-btn" title="Liste wechseln" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.7);padding:4px;display:flex;align-items:center;font-family:'DM Sans',sans-serif;font-size:0.78rem;gap:4px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Wechseln
-      </button>
       <button id="settings-btn" title="Einstellungen">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -539,6 +535,8 @@ async function checkLogin() {
     currentUser = saved;
     currentList = savedList;
     isAdmin = savedAdmin === 'true';
+    // Session-Liste im Login-Feld vorausfüllen
+    document.getElementById('login-listname').value = savedList;
     showApp();
   }
 }
@@ -592,6 +590,14 @@ async function doLogin() {
 
   // Listen-Name normalisieren
   currentList = listRaw.toLowerCase().replace(/\s+/g, '-');
+  
+  // Session löschen falls andere Liste
+  if (sessionStorage.getItem('todo_list') !== currentList) {
+    sessionStorage.removeItem('todo_user');
+    sessionStorage.removeItem('todo_isadmin');
+    sessionStorage.removeItem('todo_list');
+  }
+
   loading.style.display = 'block';
   document.getElementById('login-btn').disabled = true;
 
@@ -1041,14 +1047,6 @@ document.getElementById('settings-save-btn').addEventListener('click', async () 
     suc.style.display = 'block';
     setTimeout(() => document.getElementById('settings-modal-bg').classList.add('hidden'), 1800);
   } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
-});
-
-// ── Liste wechseln ────────────────────────────────────────────────────────────
-document.getElementById('switch-list-btn').addEventListener('click', () => {
-  sessionStorage.removeItem('todo_user');
-  sessionStorage.removeItem('todo_isadmin');
-  sessionStorage.removeItem('todo_list');
-  location.reload();
 });
 
 // ── Firebase Regeln Hinweis ───────────────────────────────────────────────────
