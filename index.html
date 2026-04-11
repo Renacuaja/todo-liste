@@ -851,7 +851,15 @@ async function correctTranscript(text) {
     });
     const data = await response.json();
     const corrected = (data.content?.[0]?.text?.trim() || text).replace(/\?$/, '.');
-    return corrected || text;
+    // Wort nach Datumsangabe mitten im Satz kleinschreiben (z.B. "22.4. Sind" → "22.4. sind")
+    const fixed = corrected.replace(/(\d{1,2}\.\d{1,2}\.)\s+([A-ZÄÖÜ][a-zäöüß]+)/g, (match, date, word) => {
+      // Nur kleinschreiben wenn es KEIN Nomen ist — Heuristik: wenn das Wort danach noch weitere Wörter hat
+      // und typische Verbendungen hat
+      const verbEndings = /^(sind|ist|war|wird|werden|haben|hat|hatte|kann|soll|muss|darf|will|wollen|sollen|müssen|können|dürfen|bin|bist|sei|wäre|würde)/i;
+      if (verbEndings.test(word)) return date + ' ' + word.charAt(0).toLowerCase() + word.slice(1);
+      return match;
+    });
+    return fixed || text;
   } catch(e) { return text; }
 }
 
