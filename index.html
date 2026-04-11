@@ -165,12 +165,19 @@
 <div id="login-screen">
   <div class="login-card">
     <h2>Einfache ToDo-Liste für den Alltag</h2>
-    <p>Bitte melde dich an, um Zugang zur Liste zu erhalten.</p>
+    <p id="login-desc">Gib den Listen-Namen und das Losungswort ein, um dich anzumelden.</p>
+    <label>Listen-Name</label>
+    <input type="text" id="login-listname" placeholder="z. B. ZuHause" autocomplete="off">
     <label>Dein Name</label>
     <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="name">
-    <label>Losungswort</label>
+    <label id="login-pw-label">Losungswort</label>
     <input type="password" id="login-pw" placeholder="••••••••">
+    <div id="login-newlist-extra" style="display:none;">
+      <label>Losungswort wiederholen</label>
+      <input type="password" id="login-pw2" placeholder="••••••••">
+    </div>
     <button id="login-btn">Anmelden</button>
+    <button id="login-newlist-toggle" style="width:100%;background:none;border:1px solid var(--border);border-radius:10px;padding:0.65rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;cursor:pointer;color:var(--muted);margin-top:8px;">+ Neue Liste erstellen</button>
     <div id="login-error"></div>
     <div id="login-loading">Prüfe Losungswort …</div>
   </div>
@@ -179,11 +186,15 @@
 <div id="app-screen">
   <header>
     <div class="header-left">
-      <h1>✎ ToDo-Liste</h1>
+      <h1 id="header-title">✎ ToDo-Liste</h1>
       <div id="header-date"></div>
     </div>
     <div class="header-right">
       <span id="user-badge"></span>
+      <button id="switch-list-btn" title="Liste wechseln" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.7);padding:4px;display:flex;align-items:center;font-family:'DM Sans',sans-serif;font-size:0.78rem;gap:4px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Wechseln
+      </button>
       <button id="settings-btn" title="Einstellungen">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -303,9 +314,27 @@
 
 <script>
 const DB_ROOT = 'https://todo-liste-d024d-default-rtdb.europe-west1.firebasedatabase.app';
-const DB_CONFIG = DB_ROOT + '/todos/config/passwort.json';
-const DB_RECUR = DB_ROOT + '/wiederkehrend.json';
-const DB_ADMIN_PW = DB_ROOT + '/todos/config/adminpasswort.json';
+
+let currentList = '';  // Normalisierter Listen-Name (z.B. "zuhause")
+
+// Dynamische DB-Pfade je nach aktiver Liste
+function dbConfig()    { return DB_ROOT + '/listen/' + currentList + '/config/passwort.json'; }
+function dbAdminPw()   { return DB_ROOT + '/listen/' + currentList + '/config/adminpasswort.json'; }
+function dbAdminSetup(){ return DB_ROOT + '/listen/' + currentList + '/config/adminsetup.json'; }
+function dbRecur()     { return DB_ROOT + '/listen/' + currentList + '/wiederkehrend.json'; }
+function dbDayUrl(key) { return DB_ROOT + '/listen/' + currentList + '/tage/' + key + '.json'; }
+function dbAllUrl()    { return DB_ROOT + '/listen/' + currentList + '/tage.json'; }
+function dbMembers()   { return DB_ROOT + '/listen/' + currentList + '/teilnehmer.json'; }
+
+// Rückwärtskompatibilität: alte "ZuHause"-Daten liegen noch unter altem Pfad
+const LEGACY_LIST = 'zuhause';
+function isLegacy() { return currentList === LEGACY_LIST; }
+function dbConfigLegacy()  { return DB_ROOT + '/todos/config/passwort.json'; }
+function dbAdminPwLegacy() { return DB_ROOT + '/todos/config/adminpasswort.json'; }
+function dbRecurLegacy()   { return DB_ROOT + '/wiederkehrend.json'; }
+function dbAllUrlLegacy()  { return DB_ROOT + '/tage.json'; }
+function dbDayUrlLegacy(key) { return DB_ROOT + '/tage/' + key + '.json'; }
+function dbMembersLegacy() { return DB_ROOT + '/teilnehmer.json'; }
 
 let allDays = {};
 let recurTasks = [];
@@ -401,7 +430,9 @@ function showSync() {
 }
 async function loadAll() {
   try {
-    const [dRes, rRes] = await Promise.all([fetch(dbAllUrl()), fetch(DB_RECUR)]);
+    const allUrl  = isLegacy() ? dbAllUrlLegacy()  : dbAllUrl();
+    const recurUrl = isLegacy() ? dbRecurLegacy() : dbRecur();
+    const [dRes, rRes] = await Promise.all([fetch(allUrl), fetch(recurUrl)]);
     const dData = await dRes.json();
     const rData = await rRes.json();
     allDays = dData && typeof dData === 'object' ? dData : {};
@@ -409,14 +440,16 @@ async function loadAll() {
   } catch(e) { console.error(e); }
 }
 async function saveDayToDB(key) {
+  const url = isLegacy() ? dbDayUrlLegacy(key) : dbDayUrl(key);
   const obj = allDays[key] || null;
-  await fetch(dbDayUrl(key), { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
+  await fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
   showSync();
 }
 async function saveRecurToDB() {
+  const url = isLegacy() ? dbRecurLegacy() : dbRecur();
   const obj = {};
   recurTasks.forEach(t => { obj['rid_' + t.rid] = t; });
-  await fetch(DB_RECUR, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
+  await fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
 }
 
 function todosForDay(key) {
@@ -484,20 +517,38 @@ function scheduleMidnightCheck() {
 }
 
 // ── Login ─────────────────────────────────────────────────────────────────────
+let isNewList = false;
+
+document.getElementById('login-newlist-toggle').addEventListener('click', () => {
+  isNewList = !isNewList;
+  document.getElementById('login-newlist-extra').style.display = isNewList ? 'block' : 'none';
+  document.getElementById('login-newlist-toggle').textContent = isNewList ? '← Zurück zur Anmeldung' : '+ Neue Liste erstellen';
+  document.getElementById('login-pw-label').textContent = isNewList ? 'Losungswort festlegen' : 'Losungswort';
+  document.getElementById('login-desc').textContent = isNewList
+    ? 'Lege einen Listen-Namen und ein Losungswort fest. Du wirst automatisch Admin.'
+    : 'Gib den Listen-Namen und das Losungswort ein, um dich anzumelden.';
+  document.getElementById('login-btn').textContent = isNewList ? 'Liste erstellen' : 'Anmelden';
+  document.getElementById('login-error').style.display = 'none';
+});
+
 async function checkLogin() {
   const saved = sessionStorage.getItem('todo_user');
   const savedAdmin = sessionStorage.getItem('todo_isadmin');
-  if (saved) {
+  const savedList = sessionStorage.getItem('todo_list');
+  if (saved && savedList) {
     currentUser = saved;
+    currentList = savedList;
     isAdmin = savedAdmin === 'true';
     showApp();
   }
 }
+
 function showApp() {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app-screen').classList.add('visible');
   document.getElementById('user-badge').textContent = '👤 ' + currentUser;
   document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('header-title').textContent = '✎ ' + currentList.charAt(0).toUpperCase() + currentList.slice(1);
   document.getElementById('settings-btn').style.display = isAdmin ? 'flex' : 'none';
   viewDateKey = todayKey();
   loadAll().then(async () => {
@@ -525,43 +576,70 @@ function showApp() {
 document.getElementById('login-btn').addEventListener('click', doLogin);
 document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
 document.getElementById('login-name').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('login-pw').focus(); });
+document.getElementById('login-listname').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('login-name').focus(); });
 
 async function doLogin() {
+  const listRaw = document.getElementById('login-listname').value.trim();
   const name = document.getElementById('login-name').value.trim();
   const pw = document.getElementById('login-pw').value;
   const err = document.getElementById('login-error');
   const loading = document.getElementById('login-loading');
   err.style.display = 'none';
+
+  if (!listRaw) { err.textContent = 'Bitte gib einen Listen-Namen ein.'; err.style.display = 'block'; return; }
   if (!name) { err.textContent = 'Bitte gib deinen Namen ein.'; err.style.display = 'block'; return; }
   if (!pw) { err.textContent = 'Bitte gib das Losungswort ein.'; err.style.display = 'block'; return; }
+
+  // Listen-Name normalisieren
+  currentList = listRaw.toLowerCase().replace(/\s+/g, '-');
   loading.style.display = 'block';
   document.getElementById('login-btn').disabled = true;
-  try {
-    const [pwRes, adminRes] = await Promise.all([fetch(DB_CONFIG), fetch(DB_ADMIN_PW)]);
-    const correctPw = await pwRes.json();
-    let adminHash = null;
-    try { adminHash = await adminRes.json(); } catch(e) {}
 
-    if (pw === correctPw) {
+  try {
+    if (isNewList) {
+      // Neue Liste erstellen
+      const pw2 = document.getElementById('login-pw2').value;
+      if (pw !== pw2) { err.textContent = 'Die Losungswörter stimmen nicht überein.'; err.style.display = 'block'; loading.style.display = 'none'; document.getElementById('login-btn').disabled = false; return; }
+      // Prüfen ob Liste schon existiert
+      const check = await fetch(dbConfig());
+      const existing = await check.json();
+      if (existing) { err.textContent = 'Eine Liste mit diesem Namen existiert bereits.'; err.style.display = 'block'; loading.style.display = 'none'; document.getElementById('login-btn').disabled = false; return; }
+      // Liste anlegen
+      await fetch(dbConfig(), { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(pw) });
       currentUser = name;
-      // Prüfe ob Admin-Losungswort gesetzt ist
-      isAdmin = false;
+      isAdmin = true;
       sessionStorage.setItem('todo_user', name);
-      sessionStorage.setItem('todo_isadmin', 'false');
+      sessionStorage.setItem('todo_isadmin', 'true');
+      sessionStorage.setItem('todo_list', currentList);
       showApp();
-      // Kein Admin-PW gesetzt → Banner anzeigen
-      if (!adminHash) {
-        document.getElementById('admin-setup-banner').style.display = 'block';
-      }
+      // Admin-Setup-Banner anzeigen
+      document.getElementById('admin-setup-banner').style.display = 'block';
     } else {
-      // Prüfe ob es das Admin-Losungswort ist
-      if (adminHash) {
+      // Bestehende Liste öffnen
+      const configUrl = isLegacy() ? dbConfigLegacy() : dbConfig();
+      const adminUrl  = isLegacy() ? dbAdminPwLegacy() : dbAdminPw();
+      const [pwRes, adminRes] = await Promise.all([fetch(configUrl), fetch(adminUrl)]);
+      const correctPw = await pwRes.json();
+      let adminHash = null;
+      try { adminHash = await adminRes.json(); } catch(e) {}
+
+      if (!correctPw) { err.textContent = 'Diese Liste existiert nicht.'; err.style.display = 'block'; }
+      else if (pw === correctPw) {
+        currentUser = name;
+        isAdmin = false;
+        sessionStorage.setItem('todo_user', name);
+        sessionStorage.setItem('todo_isadmin', 'false');
+        sessionStorage.setItem('todo_list', currentList);
+        showApp();
+        if (!adminHash) document.getElementById('admin-setup-banner').style.display = 'block';
+      } else if (adminHash) {
         const enteredHash = await sha256(pw);
         if (enteredHash === adminHash) {
           currentUser = name;
           isAdmin = true;
           sessionStorage.setItem('todo_user', name);
           sessionStorage.setItem('todo_isadmin', 'true');
+          sessionStorage.setItem('todo_list', currentList);
           showApp();
         } else {
           err.textContent = 'Falsches Losungswort. Bitte versuche es erneut.'; err.style.display = 'block';
@@ -907,7 +985,8 @@ document.getElementById('admin-setup-save').addEventListener('click', async () =
   if (!pw) { err.textContent = 'Bitte ein Admin-Losungswort eingeben.'; err.style.display = 'block'; return; }
   try {
     const hash = await sha256(pw);
-    await fetch(DB_ADMIN_PW, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(hash) });
+    const url = isLegacy() ? dbAdminPwLegacy() : dbAdminPw();
+    await fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(hash) });
     isAdmin = true;
     sessionStorage.setItem('todo_isadmin', 'true');
     document.getElementById('settings-btn').style.display = 'flex';
@@ -956,19 +1035,31 @@ document.getElementById('settings-save-btn').addEventListener('click', async () 
   if (!newPw) { err.textContent = 'Bitte neues Losungswort eingeben.'; err.style.display = 'block'; return; }
   if (newPw !== repeat) { err.textContent = 'Die neuen Losungswörter stimmen nicht überein.'; err.style.display = 'block'; return; }
   try {
-    await fetch(DB_CONFIG, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(newPw) });
+    const configUrl = isLegacy() ? dbConfigLegacy() : dbConfig();
+    await fetch(configUrl, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(newPw) });
     suc.textContent = 'Losungswort erfolgreich geändert!';
     suc.style.display = 'block';
     setTimeout(() => document.getElementById('settings-modal-bg').classList.add('hidden'), 1800);
   } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
 });
 
+// ── Liste wechseln ────────────────────────────────────────────────────────────
+document.getElementById('switch-list-btn').addEventListener('click', () => {
+  sessionStorage.removeItem('todo_user');
+  sessionStorage.removeItem('todo_isadmin');
+  sessionStorage.removeItem('todo_list');
+  location.reload();
+});
+
 // ── Firebase Regeln Hinweis ───────────────────────────────────────────────────
-// Benötigt in Firebase: "wiederkehrend": { ".read": true, ".write": true }
-// Benötigt in Firebase: "teilnehmer": { ".read": true, ".write": true }
+// Benötigt in Firebase unter "rules":
+// "listen": { ".read": true, ".write": true }
+// "tage": { ".read": true, ".write": true }        (Legacy ZuHause)
+// "wiederkehrend": { ".read": true, ".write": true } (Legacy ZuHause)
+// "teilnehmer": { ".read": true, ".write": true }   (Legacy ZuHause)
+// "todos": { "config": { ".read": true, ".write": true } } (Legacy ZuHause)
 
 // ── Teilnehmer ────────────────────────────────────────────────────────────────
-const DB_MEMBERS = DB_ROOT + '/teilnehmer.json';
 const MEMBER_COLORS = [
   {bg:'#F5DDD8',text:'#C84B2F'},{bg:'#E6F1FB',text:'#185FA5'},{bg:'#E1F5EE',text:'#085041'},
   {bg:'#EEEDFE',text:'#3C3489'},{bg:'#FAEEDA',text:'#633806'},{bg:'#EAF3DE',text:'#27500A'},
@@ -982,15 +1073,17 @@ function memberColor(id) { const m = members.find(m=>m.id===id); return m ? m.co
 
 async function loadMembers() {
   try {
-    const res = await fetch(DB_MEMBERS);
+    const url = isLegacy() ? dbMembersLegacy() : dbMembers();
+    const res = await fetch(url);
     const data = await res.json();
     members = data && typeof data === 'object' ? Object.values(data) : [];
   } catch(e) { members = []; }
 }
 async function saveMembersToDB() {
+  const url = isLegacy() ? dbMembersLegacy() : dbMembers();
   const obj = {};
   members.forEach(m => { obj['m_' + m.id] = m; });
-  await fetch(DB_MEMBERS, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
+  await fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) });
 }
 
 function renderMemberPanel() {
