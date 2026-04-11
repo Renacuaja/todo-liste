@@ -528,17 +528,7 @@ document.getElementById('login-newlist-toggle').addEventListener('click', () => 
 });
 
 async function checkLogin() {
-  const saved = sessionStorage.getItem('todo_user');
-  const savedAdmin = sessionStorage.getItem('todo_isadmin');
   const savedList = sessionStorage.getItem('todo_list');
-  if (saved && savedList) {
-    // Nur automatisch einloggen wenn Session noch aktiv
-    currentUser = saved;
-    currentList = savedList;
-    isAdmin = savedAdmin === 'true';
-    showApp();
-  }
-  // Immer den zuletzt genutzten Listen-Namen vorausfüllen
   if (savedList) document.getElementById('login-listname').value = savedList;
 }
 
