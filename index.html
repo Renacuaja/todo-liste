@@ -755,10 +755,38 @@ function ensurePeriod(text) {
   if (!text) return text;
   return /[.!?…]$/.test(text) ? text : text + '.';
 }
+// ── Datumsangabe am Satzanfang erkennen ──────────────────────────────────────
+function parseDatePrefix(text) {
+  // Erkennt: "Am 30.4." / "Am 30.4.2026" / "Am 30. April" am Satzanfang
+  const match = text.match(/^[Aa]m\s+(\d{1,2})\.(\d{1,2})\.?(?:\s+\d{4})?\s+(.+)$/);
+  if (match) {
+    const day = parseInt(match[1]);
+    const month = parseInt(match[2]);
+    const taskText = match[3].trim();
+    if (!taskText) return null;
+    const year = new Date().getFullYear();
+    const dateKey = year + '-' + String(month).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+    return { dateKey, taskText };
+  }
+  return null;
+}
+
 async function addTodo(text) {
   text = ensurePeriod(capitalize(text.trim())); if (!text) return;
   const key = todayKey();
   const assignee = null;
+
+  // Datumsangabe am Anfang → in den entsprechenden Tag schreiben
+  const datePrefix = parseDatePrefix(text);
+  if (datePrefix) {
+    const { dateKey, taskText } = datePrefix;
+    if (!allDays[dateKey]) allDays[dateKey] = {};
+    const id = Date.now();
+    allDays[dateKey]['id_' + id] = { text: ensurePeriod(capitalize(taskText)), done: false, id, author: currentUser, assignee };
+    viewDateKey = dateKey;
+    renderDay(); await saveDayToDB(dateKey);
+    return;
+  }
 
   const recur = parseRecurrence(text);
   if (recur && recur.type === 'tomorrow') {
@@ -816,7 +844,7 @@ async function correctTranscript(text) {
         max_tokens: 200,
         messages: [{
           role: 'user',
-          content: `Korrigiere diesen per Sprache eingegebenen deutschen Text. Behalte den Inhalt exakt bei. Korrigiere nur: Rechtschreibfehler durch Spracherkennung, fehlende Großschreibung von Nomen (deutsche Substantive werden großgeschrieben), fehlende Punkte in Abkürzungen (zB → z.B., usw → usw., etc), Datumsangaben immer mit Punkt nach dem Tag und Monat (22.4 → 22.4., 3.10 → 3.10.), offensichtliche Erkennungsfehler. Gib NUR den korrigierten Text zurück, ohne Erklärung, ohne Anführungszeichen: ${text}`
+          content: `Korrigiere diesen per Sprache eingegebenen deutschen Text. Es handelt sich immer um eine Aufgabe oder Erinnerung, niemals um eine Frage — setze daher niemals ein Fragezeichen. Behalte den Inhalt exakt bei. Korrigiere nur: Rechtschreibfehler durch Spracherkennung, fehlende Großschreibung von Nomen (deutsche Substantive werden großgeschrieben), fehlende Punkte in Abkürzungen (zB → z.B., usw → usw., etc), Datumsangaben immer mit Punkt nach dem Tag und Monat (22.4 → 22.4., 3.10 → 3.10.), offensichtliche Erkennungsfehler. Gib NUR den korrigierten Text zurück, ohne Erklärung, ohne Anführungszeichen: ${text}`
         }]
       })
     });
