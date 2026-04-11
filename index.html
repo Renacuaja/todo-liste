@@ -200,6 +200,16 @@
     </div>
   </header>
 
+  <div id="admin-setup-banner" style="display:none; background:#F5DDD8; border-bottom:1px solid #F0997B; padding:0.8rem 1.2rem;">
+    <p style="font-size:0.85rem; color:#C84B2F; font-weight:500; margin-bottom:0.5rem;">⚙️ Einmalige Einrichtung: Admin-Losungswort festlegen</p>
+    <p style="font-size:0.78rem; color:#993C1D; margin-bottom:0.7rem; line-height:1.5;">Lege ein geheimes Admin-Losungswort fest. Nur wer dieses Wort beim Anmelden eingibt, sieht das Einstellungs-Zahnrad.</p>
+    <div style="display:flex; gap:8px;">
+      <input type="password" id="admin-setup-input" placeholder="Admin-Losungswort …" style="flex:1; background:white; border:1px solid #F0997B; border-radius:10px; padding:0.55rem 0.8rem; font-family:'DM Sans',sans-serif; font-size:0.9rem; color:#1A1814; outline:none;">
+      <button id="admin-setup-save" style="background:#C84B2F; color:white; border:none; border-radius:10px; padding:0.55rem 1rem; font-family:'DM Sans',sans-serif; font-size:0.9rem; font-weight:500; cursor:pointer;">Speichern</button>
+    </div>
+    <div id="admin-setup-error" style="font-size:0.78rem; color:#993C1D; margin-top:5px; display:none;"></div>
+  </div>
+
   <div id="day-nav">
     <button class="day-nav-btn" id="prev-day">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
@@ -295,13 +305,13 @@
 const DB_ROOT = 'https://todo-liste-d024d-default-rtdb.europe-west1.firebasedatabase.app';
 const DB_CONFIG = DB_ROOT + '/todos/config/passwort.json';
 const DB_RECUR = DB_ROOT + '/wiederkehrend.json';
-const DB_ADMIN_NAME = DB_ROOT + '/todos/config/adminname.json';
+const DB_ADMIN_PW = DB_ROOT + '/todos/config/adminpasswort.json';
 
 let allDays = {};
 let recurTasks = [];
 let currentUser = '';
 let viewDateKey = '';
-let adminName = null;
+let isAdmin = false;
 
 // ── Datumshilfen ──────────────────────────────────────────────────────────────
 function todayKey() {
@@ -476,13 +486,10 @@ function scheduleMidnightCheck() {
 // ── Login ─────────────────────────────────────────────────────────────────────
 async function checkLogin() {
   const saved = sessionStorage.getItem('todo_user');
+  const savedAdmin = sessionStorage.getItem('todo_isadmin');
   if (saved) {
     currentUser = saved;
-    try {
-      const r = await fetch(DB_ADMIN_NAME);
-      const data = await r.json();
-      adminName = data || null;
-    } catch(e) { adminName = null; }
+    isAdmin = savedAdmin === 'true';
     showApp();
   }
 }
@@ -491,7 +498,7 @@ function showApp() {
   document.getElementById('app-screen').classList.add('visible');
   document.getElementById('user-badge').textContent = '👤 ' + currentUser;
   document.getElementById('header-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  document.getElementById('settings-btn').style.display = (adminName && currentUser.toLowerCase() === adminName.toLowerCase()) ? 'flex' : 'none';
+  document.getElementById('settings-btn').style.display = isAdmin ? 'flex' : 'none';
   viewDateKey = todayKey();
   loadAll().then(async () => {
     await loadMembers();
@@ -530,24 +537,38 @@ async function doLogin() {
   loading.style.display = 'block';
   document.getElementById('login-btn').disabled = true;
   try {
-    const [pwRes, adminRes] = await Promise.all([fetch(DB_CONFIG), fetch(DB_ADMIN_NAME)]);
+    const [pwRes, adminRes] = await Promise.all([fetch(DB_CONFIG), fetch(DB_ADMIN_PW)]);
     const correctPw = await pwRes.json();
-    const storedAdmin = await adminRes.json();
+    let adminHash = null;
+    try { adminHash = await adminRes.json(); } catch(e) {}
 
     if (pw === correctPw) {
       currentUser = name;
+      // Prüfe ob Admin-Losungswort gesetzt ist
+      isAdmin = false;
       sessionStorage.setItem('todo_user', name);
-
-      // Erster Login → diesen Nutzer als Admin speichern
-      if (!storedAdmin) {
-        await fetch(DB_ADMIN_NAME, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(name) });
-        adminName = name;
-      } else {
-        adminName = storedAdmin;
-      }
+      sessionStorage.setItem('todo_isadmin', 'false');
       showApp();
+      // Kein Admin-PW gesetzt → Banner anzeigen
+      if (!adminHash) {
+        document.getElementById('admin-setup-banner').style.display = 'block';
+      }
     } else {
-      err.textContent = 'Falsches Losungswort. Bitte versuche es erneut.'; err.style.display = 'block';
+      // Prüfe ob es das Admin-Losungswort ist
+      if (adminHash) {
+        const enteredHash = await sha256(pw);
+        if (enteredHash === adminHash) {
+          currentUser = name;
+          isAdmin = true;
+          sessionStorage.setItem('todo_user', name);
+          sessionStorage.setItem('todo_isadmin', 'true');
+          showApp();
+        } else {
+          err.textContent = 'Falsches Losungswort. Bitte versuche es erneut.'; err.style.display = 'block';
+        }
+      } else {
+        err.textContent = 'Falsches Losungswort. Bitte versuche es erneut.'; err.style.display = 'block';
+      }
     }
   } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
   loading.style.display = 'none';
@@ -835,31 +856,42 @@ async function sha256(text) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
+// ── Admin-Einrichtungs-Banner ─────────────────────────────────────────────────
+document.getElementById('admin-setup-save').addEventListener('click', async () => {
+  const pw = document.getElementById('admin-setup-input').value.trim();
+  const err = document.getElementById('admin-setup-error');
+  err.style.display = 'none';
+  if (!pw) { err.textContent = 'Bitte ein Admin-Losungswort eingeben.'; err.style.display = 'block'; return; }
+  try {
+    const hash = await sha256(pw);
+    await fetch(DB_ADMIN_PW, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(hash) });
+    isAdmin = true;
+    sessionStorage.setItem('todo_isadmin', 'true');
+    document.getElementById('settings-btn').style.display = 'flex';
+    document.getElementById('admin-setup-banner').style.display = 'none';
+  } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
+});
+document.getElementById('admin-setup-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('admin-setup-save').click();
+});
+
 async function openSettings() {
-  ['settings-error','settings-error2','settings-success','settings-success2'].forEach(id => {
+  ['settings-error2','settings-success2'].forEach(id => {
     document.getElementById(id).style.display = 'none';
     document.getElementById(id).textContent = '';
   });
-  ['settings-admin-new1','settings-admin-new2','settings-admin-input','settings-pw-new','settings-pw-repeat'].forEach(id => {
+  ['settings-pw-new','settings-pw-repeat'].forEach(id => {
     document.getElementById(id).value = '';
   });
-
-  let adminHash = null;
-  try { const r = await fetch(DB_ADMIN); adminHash = await r.json(); } catch(e) {}
-
-  if (!adminHash) {
-    document.getElementById('settings-title').textContent = 'Admin-Passwort einrichten';
-    document.getElementById('settings-desc').textContent = 'Noch kein Admin-Passwort vorhanden. Lege jetzt eines fest — es wird verschlüsselt gespeichert und ist nicht auslesbar.';
-    document.getElementById('settings-setup-view').style.display = 'block';
-    document.getElementById('settings-change-view').style.display = 'none';
-    document.getElementById('settings-admin-new1').focus();
-  } else {
-    document.getElementById('settings-title').textContent = 'Losungswort ändern';
-    document.getElementById('settings-desc').textContent = 'Nur der Admin kann das Losungswort ändern.';
-    document.getElementById('settings-setup-view').style.display = 'none';
-    document.getElementById('settings-change-view').style.display = 'block';
-    document.getElementById('settings-admin-input').focus();
-  }
+  document.getElementById('settings-title').textContent = 'Losungswort ändern';
+  document.getElementById('settings-desc').textContent = 'Nur der Admin kann das Losungswort ändern.';
+  document.getElementById('settings-setup-view').style.display = 'none';
+  document.getElementById('settings-change-view').style.display = 'block';
+  // Admin-Passwort-Feld ausblenden — Admin ist bereits eingeloggt
+  document.getElementById('settings-admin-input').closest('label') && (document.getElementById('settings-admin-input').parentElement.style.display = 'none');
+  document.getElementById('settings-admin-input').style.display = 'none';
+  document.getElementById('settings-admin-input').previousElementSibling && (document.getElementById('settings-admin-input').previousElementSibling.style.display = 'none');
+  document.getElementById('settings-pw-new').focus();
   document.getElementById('settings-modal-bg').classList.remove('hidden');
 }
 
@@ -872,39 +904,15 @@ document.getElementById('settings-modal-bg').addEventListener('click', e => {
     document.getElementById('settings-modal-bg').classList.add('hidden');
 });
 
-document.getElementById('settings-setup-btn').addEventListener('click', async () => {
-  const pw1 = document.getElementById('settings-admin-new1').value;
-  const pw2 = document.getElementById('settings-admin-new2').value;
-  const err = document.getElementById('settings-error');
-  const suc = document.getElementById('settings-success');
-  err.style.display = 'none'; suc.style.display = 'none';
-  if (!pw1) { err.textContent = 'Bitte ein Admin-Passwort eingeben.'; err.style.display = 'block'; return; }
-  if (pw1 !== pw2) { err.textContent = 'Die Passwörter stimmen nicht überein.'; err.style.display = 'block'; return; }
-  try {
-    const hash = await sha256(pw1);
-    await fetch(DB_ADMIN, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(hash) });
-    suc.textContent = 'Admin-Passwort gespeichert!';
-    suc.style.display = 'block';
-    setTimeout(() => document.getElementById('settings-modal-bg').classList.add('hidden'), 1800);
-  } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
-});
-
 document.getElementById('settings-save-btn').addEventListener('click', async () => {
-  const adminPw = document.getElementById('settings-admin-input').value;
   const newPw = document.getElementById('settings-pw-new').value;
   const repeat = document.getElementById('settings-pw-repeat').value;
   const err = document.getElementById('settings-error2');
   const suc = document.getElementById('settings-success2');
   err.style.display = 'none'; suc.style.display = 'none';
-  if (!adminPw) { err.textContent = 'Bitte Admin-Passwort eingeben.'; err.style.display = 'block'; return; }
   if (!newPw) { err.textContent = 'Bitte neues Losungswort eingeben.'; err.style.display = 'block'; return; }
   if (newPw !== repeat) { err.textContent = 'Die neuen Losungswörter stimmen nicht überein.'; err.style.display = 'block'; return; }
   try {
-    const [adminHash, enteredHash] = await Promise.all([
-      fetch(DB_ADMIN).then(r => r.json()),
-      sha256(adminPw)
-    ]);
-    if (enteredHash !== adminHash) { err.textContent = 'Falsches Admin-Passwort.'; err.style.display = 'block'; return; }
     await fetch(DB_CONFIG, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(newPw) });
     suc.textContent = 'Losungswort erfolgreich geändert!';
     suc.style.display = 'block';
