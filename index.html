@@ -605,7 +605,7 @@ function renderDay() {
   const label = formatDayLabel(viewDateKey);
   document.querySelector('#day-label .day-name').textContent = label.name;
   document.querySelector('#day-label .day-sub').textContent = label.sub;
-  document.getElementById('next-day').disabled = isFuture;
+  document.getElementById('next-day').disabled = false;
   document.getElementById('past-notice').style.display = inputDisabled ? 'block' : 'none';
   document.getElementById('text-input').disabled = inputDisabled;
   document.getElementById('add-btn').disabled = inputDisabled;
