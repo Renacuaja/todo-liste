@@ -57,7 +57,7 @@
   #clear-done { font-size: 0.78rem; color: var(--accent); background: none; border: none; font-family: 'DM Sans', sans-serif; cursor: pointer; font-weight: 500; display: none; }
 
   #todo-list { padding: 0 1rem; display: flex; flex-direction: column; gap: 8px; }
-  .todo-item { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 12px; animation: slideIn 0.2s ease; box-shadow: var(--shadow); }
+  .todo-item { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 12px; box-shadow: var(--shadow); }
   .todo-item.recurring { border-left: 3px solid var(--recur); }
   @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
   .todo-check { width: 22px; height: 22px; min-width: 22px; border-radius: 50%; border: 2px solid var(--border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 2px; }
@@ -438,10 +438,15 @@ function showApp() {
     renderDay();
   });
   setInterval(async () => {
-    const before = JSON.stringify(allDays) + JSON.stringify(recurTasks);
+    const countBefore = Object.values(allDays).reduce((s, d) => s + (d ? Object.keys(d).length : 0), 0);
+    const recurBefore = recurTasks.length;
     await loadAll();
-    const after = JSON.stringify(allDays) + JSON.stringify(recurTasks);
-    if (before !== after) { ensureRecurringForDay(viewDateKey); renderDay(); }
+    const countAfter = Object.values(allDays).reduce((s, d) => s + (d ? Object.keys(d).length : 0), 0);
+    const recurAfter = recurTasks.length;
+    const dayBefore = JSON.stringify(allDays[viewDateKey] || {});
+    if (countBefore !== countAfter || recurBefore !== recurAfter || dayBefore !== JSON.stringify(allDays[viewDateKey] || {})) {
+      ensureRecurringForDay(viewDateKey); renderDay();
+    }
   }, 5000);
   scheduleMidnightCheck();
 }
