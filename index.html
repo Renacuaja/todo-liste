@@ -877,7 +877,13 @@ else {
   recog.onend = () => { listening=false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); micBtn.querySelector('svg').style.stroke='#1A1814'; };
   recog.onerror = () => { listening=false; micBtn.classList.remove('listening'); listeningLabel.classList.remove('show'); };
   recog.onresult = async e => {
-    const transcript = e.results[0][0].transcript.trim();
+    const raw = e.results[0][0].transcript.trim();
+    // Verb nach Datumsangabe direkt im Rohtext kleinschreiben
+    const transcript = raw.replace(/(\d{1,2}\.\d{1,2}\.?)\s+([A-ZÄÖÜ][a-zäöüß]+)/g, (match, date, word) => {
+      const verbPattern = /^(sind|ist|war|wird|werden|haben|hat|hatte|kann|soll|muss|darf|will|wollen|sollen|müssen|können|dürfen|bin|bist|sei|wäre|würde|stehen|liegen|gehen|kommen|machen|tun|laufen|fahren|fliegen|essen|trinken|schlafen|arbeiten|kaufen|holen|bringen|nehmen|geben|sagen|zeigen|angesagt|geplant|vorgesehen|fällig)/i;
+      if (verbPattern.test(word)) return date + ' ' + word.charAt(0).toLowerCase() + word.slice(1);
+      return match;
+    });
     const recur = parseRecurrence(transcript);
     if (recur) { addTodo(transcript); return; }
     const corrected = await correctTranscript(transcript);
