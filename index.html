@@ -140,6 +140,24 @@
   #new-member-input:focus { border-color: var(--ink); }
   #add-member-btn { background: var(--ink); color: white; border: none; border-radius: 10px; padding: 0.55rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
   #close-modal-btn { display: block; width: 100%; margin-top: 12px; background: none; border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; cursor: pointer; color: var(--muted); }
+
+  /* Einstellungs-Modal */
+  #settings-modal-bg { position: fixed; inset: 0; background: rgba(26,24,20,0.45); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
+  #settings-modal-bg.hidden { display: none; }
+  #settings-modal { background: var(--card); border-radius: 18px 18px 0 0; width: 100%; max-width: 480px; padding: 1.2rem 1.2rem 2rem; }
+  #settings-modal h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 400; margin-bottom: 0.3rem; }
+  #settings-modal p { font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.5; }
+  #settings-modal label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; margin-top: 10px; }
+  #settings-modal input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); outline: none; margin-bottom: 4px; }
+  #settings-modal input:focus { border-color: var(--ink); }
+  #settings-save-btn { width: 100%; background: var(--ink); color: white; border: none; border-radius: 10px; padding: 0.72rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; margin-top: 12px; }
+  #settings-save-btn:active { background: #333; }
+  #settings-error { color: var(--accent); font-size: 0.82rem; margin-top: 0.5rem; display: none; }
+  #settings-success { color: #3d6b50; font-size: 0.82rem; margin-top: 0.5rem; display: none; }
+  #settings-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.7); padding: 4px; display: flex; align-items: center; }
+  #settings-btn:hover { color: white; }
+  #settings-setup-view { display: none; }
+  #settings-change-view { display: none; }
 </style>
 </head>
 <body>
@@ -166,6 +184,12 @@
     </div>
     <div class="header-right">
       <span id="user-badge"></span>
+      <button id="settings-btn" title="Einstellungen">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
       <button id="share-btn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -200,6 +224,35 @@
     <button id="clear-done">Erledigte löschen</button>
   </div>
   <div id="todo-list"></div>
+
+  <!-- Einstellungs-Modal -->
+  <div id="settings-modal-bg" class="hidden">
+    <div id="settings-modal">
+      <h3 id="settings-title">Losungswort ändern</h3>
+      <p id="settings-desc"></p>
+      <div id="settings-setup-view">
+        <label>Admin-Passwort festlegen</label>
+        <input type="password" id="settings-admin-new1" placeholder="••••••••">
+        <label>Wiederholen</label>
+        <input type="password" id="settings-admin-new2" placeholder="••••••••">
+        <div id="settings-error"></div>
+        <div id="settings-success"></div>
+        <button id="settings-setup-btn">Admin-Passwort speichern</button>
+      </div>
+      <div id="settings-change-view">
+        <label>Admin-Passwort</label>
+        <input type="password" id="settings-admin-input" placeholder="••••••••">
+        <label>Neues Losungswort</label>
+        <input type="password" id="settings-pw-new" placeholder="••••••••">
+        <label>Neues Losungswort wiederholen</label>
+        <input type="password" id="settings-pw-repeat" placeholder="••••••••">
+        <div id="settings-error2"></div>
+        <div id="settings-success2"></div>
+        <button id="settings-save-btn">Speichern</button>
+      </div>
+      <button id="close-settings-btn" style="display:block;width:100%;margin-top:8px;background:none;border:1px solid var(--border);border-radius:10px;padding:0.6rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;cursor:pointer;color:var(--muted);">Abbrechen</button>
+    </div>
+  </div>
 
   <!-- Teilnehmer-Modal -->
   <div id="member-modal-bg" class="hidden">
@@ -723,6 +776,91 @@ else {
     addTodo(transcript);
   };
 }
+
+// ── Einstellungen / Losungswort ändern ───────────────────────────────────────
+const DB_ADMIN = DB_ROOT + '/todos/config/admin.json';
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function openSettings() {
+  ['settings-error','settings-error2','settings-success','settings-success2'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+    document.getElementById(id).textContent = '';
+  });
+  ['settings-admin-new1','settings-admin-new2','settings-admin-input','settings-pw-new','settings-pw-repeat'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  let adminHash = null;
+  try { const r = await fetch(DB_ADMIN); adminHash = await r.json(); } catch(e) {}
+
+  if (!adminHash) {
+    document.getElementById('settings-title').textContent = 'Admin-Passwort einrichten';
+    document.getElementById('settings-desc').textContent = 'Noch kein Admin-Passwort vorhanden. Lege jetzt eines fest — es wird verschlüsselt gespeichert und ist nicht auslesbar.';
+    document.getElementById('settings-setup-view').style.display = 'block';
+    document.getElementById('settings-change-view').style.display = 'none';
+    document.getElementById('settings-admin-new1').focus();
+  } else {
+    document.getElementById('settings-title').textContent = 'Losungswort ändern';
+    document.getElementById('settings-desc').textContent = 'Nur der Admin kann das Losungswort ändern.';
+    document.getElementById('settings-setup-view').style.display = 'none';
+    document.getElementById('settings-change-view').style.display = 'block';
+    document.getElementById('settings-admin-input').focus();
+  }
+  document.getElementById('settings-modal-bg').classList.remove('hidden');
+}
+
+document.getElementById('settings-btn').addEventListener('click', openSettings);
+document.getElementById('close-settings-btn').addEventListener('click', () => {
+  document.getElementById('settings-modal-bg').classList.add('hidden');
+});
+document.getElementById('settings-modal-bg').addEventListener('click', e => {
+  if (e.target === document.getElementById('settings-modal-bg'))
+    document.getElementById('settings-modal-bg').classList.add('hidden');
+});
+
+document.getElementById('settings-setup-btn').addEventListener('click', async () => {
+  const pw1 = document.getElementById('settings-admin-new1').value;
+  const pw2 = document.getElementById('settings-admin-new2').value;
+  const err = document.getElementById('settings-error');
+  const suc = document.getElementById('settings-success');
+  err.style.display = 'none'; suc.style.display = 'none';
+  if (!pw1) { err.textContent = 'Bitte ein Admin-Passwort eingeben.'; err.style.display = 'block'; return; }
+  if (pw1 !== pw2) { err.textContent = 'Die Passwörter stimmen nicht überein.'; err.style.display = 'block'; return; }
+  try {
+    const hash = await sha256(pw1);
+    await fetch(DB_ADMIN, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(hash) });
+    suc.textContent = 'Admin-Passwort gespeichert!';
+    suc.style.display = 'block';
+    setTimeout(() => document.getElementById('settings-modal-bg').classList.add('hidden'), 1800);
+  } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
+});
+
+document.getElementById('settings-save-btn').addEventListener('click', async () => {
+  const adminPw = document.getElementById('settings-admin-input').value;
+  const newPw = document.getElementById('settings-pw-new').value;
+  const repeat = document.getElementById('settings-pw-repeat').value;
+  const err = document.getElementById('settings-error2');
+  const suc = document.getElementById('settings-success2');
+  err.style.display = 'none'; suc.style.display = 'none';
+  if (!adminPw) { err.textContent = 'Bitte Admin-Passwort eingeben.'; err.style.display = 'block'; return; }
+  if (!newPw) { err.textContent = 'Bitte neues Losungswort eingeben.'; err.style.display = 'block'; return; }
+  if (newPw !== repeat) { err.textContent = 'Die neuen Losungswörter stimmen nicht überein.'; err.style.display = 'block'; return; }
+  try {
+    const [adminHash, enteredHash] = await Promise.all([
+      fetch(DB_ADMIN).then(r => r.json()),
+      sha256(adminPw)
+    ]);
+    if (enteredHash !== adminHash) { err.textContent = 'Falsches Admin-Passwort.'; err.style.display = 'block'; return; }
+    await fetch(DB_CONFIG, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(newPw) });
+    suc.textContent = 'Losungswort erfolgreich geändert!';
+    suc.style.display = 'block';
+    setTimeout(() => document.getElementById('settings-modal-bg').classList.add('hidden'), 1800);
+  } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
+});
 
 // ── Firebase Regeln Hinweis ───────────────────────────────────────────────────
 // Benötigt in Firebase: "wiederkehrend": { ".read": true, ".write": true }
