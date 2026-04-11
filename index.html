@@ -622,11 +622,20 @@ async function doLogin() {
       const configUrl = isLegacy() ? dbConfigLegacy() : dbConfig();
       const adminUrl  = isLegacy() ? dbAdminPwLegacy() : dbAdminPw();
       const [pwRes, adminRes] = await Promise.all([fetch(configUrl), fetch(adminUrl)]);
-      const correctPw = await pwRes.json();
+      
+      let correctPw = null;
+      try { 
+        const text = await pwRes.text();
+        correctPw = text && text !== 'null' ? JSON.parse(text) : null;
+      } catch(e) { correctPw = null; }
+      
       let adminHash = null;
-      try { adminHash = await adminRes.json(); } catch(e) {}
+      try { 
+        const text = await adminRes.text();
+        adminHash = text && text !== 'null' ? JSON.parse(text) : null;
+      } catch(e) { adminHash = null; }
 
-      if (!correctPw) { err.textContent = 'Diese Liste existiert nicht.'; err.style.display = 'block'; }
+      if (!correctPw) { err.textContent = 'Diese Liste existiert nicht. Bitte eine neue Liste erstellen.'; err.style.display = 'block'; }
       else if (pw === correctPw) {
         currentUser = name;
         isAdmin = false;
