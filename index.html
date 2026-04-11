@@ -753,7 +753,8 @@ function renderDay() {
 // ── Aufgabe hinzufügen ────────────────────────────────────────────────────────
 function ensurePeriod(text) {
   if (!text) return text;
-  return /[.!?…]$/.test(text) ? text : text + '.';
+  text = text.replace(/\?$/, '.');
+  return /[.!…]$/.test(text) ? text : text + '.';
 }
 // ── Datumsangabe am Satzanfang erkennen ──────────────────────────────────────
 function parseDatePrefix(text) {
