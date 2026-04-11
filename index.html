@@ -621,6 +621,10 @@ async function doLogin() {
       // Bestehende Liste öffnen
       const configUrl = isLegacy() ? dbConfigLegacy() : dbConfig();
       const adminUrl  = isLegacy() ? dbAdminPwLegacy() : dbAdminPw();
+      
+      // DEBUG: Zeige welche URL abgefragt wird
+      alert('DEBUG: Prüfe URL: ' + configUrl + '\nListe: ' + currentList + '\nIsLegacy: ' + isLegacy());
+      
       const [pwRes, adminRes] = await Promise.all([fetch(configUrl), fetch(adminUrl)]);
       
       let correctPw = null;
