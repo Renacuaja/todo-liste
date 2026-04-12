@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meine Links</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f1f0ec;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.18);
+    --text: #1a1917;
+    --text2: #6b6a66;
+    --text3: #9e9d99;
+    --accent: #2d6a4f;
+    --accent-light: #e8f5ef;
+    --danger: #a32d2d;
+    --danger-light: #fcebeb;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1917;
+      --surface: #242320;
+      --surface2: #2e2d2a;
+      --border: rgba(255,255,255,0.10);
+      --border2: rgba(255,255,255,0.18);
+      --text: #f0ede8;
+      --text2: #9e9d99;
+      --text3: #6b6a66;
+      --accent: #52b788;
+      --accent-light: #0d2e1e;
+      --danger: #e07070;
+      --danger-light: #2e1414;
+    }
+  }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  header {
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border2);
+    padding-bottom: 1rem;
+  }
+
+  header h1 {
+    font-size: 22px;
+    font-weight: normal;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  header span {
+    font-size: 13px;
+    color: var(--text3);
+    font-family: 'Courier New', monospace;
+  }
+
+  .toolbar {
+    max-width: 720px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    cursor: pointer;
+    font-family: 'Georgia', serif;
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    transition: background 0.12s, opacity 0.12s;
+  }
+
+  button:hover { background: var(--surface2); }
+
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  button.primary:hover { opacity: 0.88; }
+
+  button.danger {
+    color: var(--danger);
+    border-color: transparent;
+    background: transparent;
+    padding: 4px 8px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+
+  .main { max-width: 720px; margin: 0 auto; }
+
+  .category {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 10px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .cat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    background: var(--surface2);
+    user-select: none;
+  }
+
+  .cat-header:hover { background: var(--border); }
+
+  .chevron {
+    font-size: 10px;
+    color: var(--text3);
+    transition: transform 0.15s;
+    display: inline-block;
+    width: 12px;
+  }
+
+  .chevron.open { transform: rotate(90deg); }
+
+  .cat-title {
+    font-size: 15px;
+    font-weight: normal;
+    flex: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .count {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: 'Courier New', monospace;
+  }
+
+  .cat-actions { display: flex; gap: 4px; }
+
+  .subcategory { border-top: 0.5px solid var(--border); }
+
+  .sub-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 8px 28px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .sub-header:hover { background: var(--surface2); }
+
+  .sub-title {
+    font-size: 13px;
+    flex: 1;
+    color: var(--text2);
+    font-style: italic;
+  }
+
+  .links-list { padding: 2px 0 8px 38px; }
+  .links-list.toplevel { padding-left: 18px; }
+
+  .link-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px 5px 0;
+    border-radius: 6px;
+  }
+
+  .link-item:hover { background: var(--surface2); }
+  .link-item:hover .danger { opacity: 1; }
+
+  .favicon {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  .link-info { flex: 1; overflow: hidden; }
+
+  .link-name {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .link-name a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .link-name a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .link-domain {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .add-here {
+    font-size: 12px;
+    padding: 3px 10px;
+    margin: 0 10px 10px 38px;
+    color: var(--text3);
+    border-color: var(--border);
+  }
+
+  .add-here.toplevel { margin-left: 18px; }
+  .add-here:hover { color: var(--accent); }
+
+  .empty-state {
+    font-size: 13px;
+    color: var(--text3);
+    padding: 2rem 0;
+    font-style: italic;
+  }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    backdrop-filter: blur(2px);
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    width: 360px;
+    max-width: calc(100vw - 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+
+  .modal h3 {
+    font-size: 16px;
+    font-weight: normal;
+    letter-spacing: -0.01em;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+
+  .field label {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .field input, .field select {
+    font-family: 'Georgia', serif;
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    width: 100%;
+  }
+
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
+
+  .search-bar {
+    max-width: 720px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .search-bar input {
+    font-family: 'Georgia', serif;
+    font-size: 14px;
+    padding: 9px 14px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    width: 100%;
+  }
+
+  .search-bar input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .search-results { max-width: 720px; margin: 0 auto; }
+
+  .sr { padding: 6px 0; border-bottom: 0.5px solid var(--border); }
+  .sr:last-child { border-bottom: none; }
+  .sr-path { font-size: 11px; color: var(--text3); margin-bottom: 2px; font-family: 'Courier New', monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Meine Links</h1>
+  <span id="total-count"></span>
+</header>
+
+<div class="search-bar">
+  <input type="search" id="search" placeholder="Links durchsuchen…" oninput="renderSearch()" />
+</div>
+
+<div class="toolbar">
+  <button class="primary" onclick="openModal('cat')">+ Kategorie</button>
+  <button onclick="openModal('sub')">+ Unterkategorie</button>
+  <button onclick="openModal('link')">+ Link</button>
+</div>
+
+<div class="main" id="main"></div>
+<div class="search-results" id="search-results" style="display:none"></div>
+
+<!-- Modal: Kategorie -->
+<div id="modal-cat" class="modal-bg" style="display:none" onclick="bgClose(event,'cat')">
+  <div class="modal">
+    <h3>Neue Kategorie</h3>
+    <div class="field">
+      <label>Name</label>
+      <input id="cat-name" placeholder="z.B. Garten" onkeydown="if(event.key==='Enter')addCategory()" />
+    </div>
+    <div class="modal-actions">
+      <button onclick="closeModal('cat')">Abbrechen</button>
+      <button class="primary" onclick="addCategory()">Erstellen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Unterkategorie -->
+<div id="modal-sub" class="modal-bg" style="display:none" onclick="bgClose(event,'sub')">
+  <div class="modal">
+    <h3>Neue Unterkategorie</h3>
+    <div class="field">
+      <label>Kategorie</label>
+      <select id="sub-cat"></select>
+    </div>
+    <div class="field">
+      <label>Name</label>
+      <input id="sub-name" placeholder="z.B. Laufen" onkeydown="if(event.key==='Enter')addSub()" />
+    </div>
+    <div class="modal-actions">
+      <button onclick="closeModal('sub')">Abbrechen</button>
+      <button class="primary" onclick="addSub()">Erstellen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Link -->
+<div id="modal-link" class="modal-bg" style="display:none" onclick="bgClose(event,'link')">
+  <div class="modal">
+    <h3>Link hinzufügen</h3>
+    <div class="field">
+      <label>Kategorie</label>
+      <select id="link-cat" onchange="updateSubSelect()"></select>
+    </div>
+    <div class="field">
+      <label>Unterkategorie (optional)</label>
+      <select id="link-sub"></select>
+    </div>
+    <div class="field">
+      <label>URL</label>
+      <input id="link-url" placeholder="https://…" onkeydown="if(event.key==='Enter')addLink()" />
+    </div>
+    <div class="field">
+      <label>Titel (optional)</label>
+      <input id="link-title" placeholder="Wird automatisch aus der URL ermittelt" />
+    </div>
+    <div class="modal-actions">
+      <button onclick="closeModal('link')">Abbrechen</button>
+      <button class="primary" onclick="addLink()">Hinzufügen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('linkorg_v1') || '{"cats":[]}');
+let collapsed = JSON.parse(localStorage.getItem('linkorg_collapsed') || '{}');
+let pendingCat = null, pendingSub = null;
+
+function save() { localStorage.setItem('linkorg_v1', JSON.stringify(data)); }
+function saveCollapsed() { localStorage.setItem('linkorg_collapsed', JSON.stringify(collapsed)); }
+
+function hostname(url) { try { return new URL(url).hostname; } catch { return ''; } }
+function favicon(url) { return 'https://www.google.com/s2/favicons?sz=32&domain=' + hostname(url); }
+function autoTitle(url) {
+  try {
+    let u = new URL(url);
+    let h = u.hostname.replace(/^www\./, '');
+    let p = u.pathname !== '/' ? u.pathname.replace(/\/$/, '') : '';
+    return h + p;
+  } catch { return url; }
+}
+
+function totalLinks() {
+  return data.cats.reduce((a, c) => a + c.links.length + (c.subs || []).reduce((b, s) => b + s.links.length, 0), 0);
+}
+
+function render() {
+  const q = document.getElementById('search').value.trim();
+  if (q) { renderSearch(); return; }
+  document.getElementById('search-results').style.display = 'none';
+  document.getElementById('main').style.display = '';
+
+  const total = totalLinks();
+  document.getElementById('total-count').textContent = total + ' Link' + (total !== 1 ? 's' : '');
+
+  const main = document.getElementById('main');
+  if (!data.cats.length) {
+    main.innerHTML = '<p class="empty-state">Noch keine Kategorien. Fang mit "+ Kategorie" an.</p>';
+    return;
+  }
+
+  main.innerHTML = data.cats.map((cat, ci) => {
+    const ck = 'c' + ci;
+    const open = !collapsed[ck];
+    const total = cat.links.length + (cat.subs || []).reduce((a, s) => a + s.links.length, 0);
+
+    let html = `<div class="category">
+      <div class="cat-header" onclick="toggleCollapse('${ck}')">
+        <span class="chevron ${open ? 'open' : ''}">▶</span>
+        <span class="cat-title">${esc(cat.name)}</span>
+        <span class="count">${total}</span>
+        <div class="cat-actions" onclick="event.stopPropagation()">
+          <button class="danger" onclick="deleteCat(${ci})" title="Löschen">✕</button>
+        </div>
+      </div>`;
+
+    if (open) {
+      if (cat.links.length) {
+        html += `<div style="border-top:0.5px solid var(--border)"><div class="links-list toplevel">` +
+          cat.links.map((l, li) => linkRow(l, `deleteCatLink(${ci},${li})`)).join('') +
+          `</div></div>`;
+      }
+
+      (cat.subs || []).forEach((sub, si) => {
+        const sk = 'c' + ci + 's' + si;
+        const subOpen = !collapsed[sk];
+        html += `<div class="subcategory">
+          <div class="sub-header" onclick="toggleCollapse('${sk}')">
+            <span class="chevron ${subOpen ? 'open' : ''}" style="font-size:9px">▶</span>
+            <span class="sub-title">${esc(sub.name)}</span>
+            <span class="count">${sub.links.length}</span>
+            <div onclick="event.stopPropagation()">
+              <button class="danger" onclick="deleteSub(${ci},${si})" title="Löschen">✕</button>
+            </div>
+          </div>`;
+        if (subOpen) {
+          html += `<div class="links-list">` +
+            (sub.links.length
+              ? sub.links.map((l, li) => linkRow(l, `deleteSubLink(${ci},${si},${li})`)).join('')
+              : `<p style="font-size:13px;color:var(--text3);padding:6px 0 10px;font-style:italic">Noch keine Links</p>`) +
+            `</div>`;
+        }
+        html += `</div>`;
+      });
+
+      html += `<button class="add-here ${cat.links.length === 0 && (!cat.subs || !cat.subs.length) ? 'toplevel' : ''}"
+        onclick="openModalForCat(${ci})">+ Link hier einfügen</button>`;
+    }
+    html += `</div>`;
+    return html;
+  }).join('');
+}
+
+function linkRow(l, delCall) {
+  return `<div class="link-item">
+    <img class="favicon" src="${favicon(l.url)}" onerror="this.style.display='none'" loading="lazy" />
+    <div class="link-info">
+      <div class="link-name"><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.title || autoTitle(l.url))}</a></div>
+      <div class="link-domain">${hostname(l.url)}</div>
+    </div>
+    <button class="danger" onclick="${delCall}" title="Löschen">✕</button>
+  </div>`;
+}
+
+function renderSearch() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  document.getElementById('main').style.display = q ? 'none' : '';
+  const rs = document.getElementById('search-results');
+  if (!q) { rs.style.display = 'none'; return; }
+  rs.style.display = '';
+
+  let results = [];
+  data.cats.forEach((cat, ci) => {
+    cat.links.forEach((l, li) => {
+      if (matches(l, q)) results.push({ l, path: cat.name, del: `deleteCatLink(${ci},${li})` });
+    });
+    (cat.subs || []).forEach((sub, si) => {
+      sub.links.forEach((l, li) => {
+        if (matches(l, q)) results.push({ l, path: cat.name + ' › ' + sub.name, del: `deleteSubLink(${ci},${si},${li})` });
+      });
+    });
+  });
+
+  if (!results.length) {
+    rs.innerHTML = '<p style="font-size:13px;color:var(--text3);font-style:italic;padding:1rem 0">Keine Ergebnisse.</p>';
+    return;
+  }
+
+  rs.innerHTML = `<div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:8px 14px">` +
+    results.map(r => `<div class="sr">
+      <div class="sr-path">${esc(r.path)}</div>
+      ${linkRow(r.l, r.del)}
+    </div>`).join('') + `</div>`;
+}
+
+function matches(l, q) {
+  return (l.title || '').toLowerCase().includes(q) ||
+    l.url.toLowerCase().includes(q) ||
+    hostname(l.url).toLowerCase().includes(q);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function toggleCollapse(key) { collapsed[key] = !collapsed[key]; saveCollapsed(); render(); }
+
+function openModal(type) {
+  if (type === 'sub' || type === 'link') {
+    const sel = document.getElementById(type === 'sub' ? 'sub-cat' : 'link-cat');
+    sel.innerHTML = data.cats.map((c, i) => `<option value="${i}">${esc(c.name)}</option>`).join('');
+    if (type === 'link') updateSubSelect();
+    if (pendingCat !== null) { sel.value = pendingCat; if (type === 'link') updateSubSelect(); }
+    if (pendingSub !== null && type === 'link') document.getElementById('link-sub').value = pendingSub;
+  }
+  document.getElementById('modal-' + type).style.display = 'flex';
+  setTimeout(() => {
+    const inp = document.querySelector('#modal-' + type + ' input');
+    if (inp) inp.focus();
+  }, 50);
+}
+
+function openModalForCat(ci, si) {
+  pendingCat = ci;
+  pendingSub = si !== undefined ? si : null;
+  openModal('link');
+  pendingCat = null; pendingSub = null;
+}
+
+function closeModal(type) {
+  document.getElementById('modal-' + type).style.display = 'none';
+  const inp = document.querySelectorAll('#modal-' + type + ' input');
+  inp.forEach(i => i.value = '');
+}
+
+function bgClose(e, type) { if (e.target === e.currentTarget) closeModal(type); }
+
+function updateSubSelect() {
+  const ci = document.getElementById('link-cat').value;
+  const sel = document.getElementById('link-sub');
+  const subs = (data.cats[ci] && data.cats[ci].subs) || [];
+  sel.innerHTML = '<option value="">— direkt in Kategorie —</option>' +
+    subs.map((s, i) => `<option value="${i}">${esc(s.name)}</option>`).join('');
+}
+
+function addCategory() {
+  const name = document.getElementById('cat-name').value.trim();
+  if (!name) return;
+  data.cats.push({ name, links: [], subs: [] });
+  save(); render(); closeModal('cat');
+}
+
+function addSub() {
+  const ci = document.getElementById('sub-cat').value;
+  const name = document.getElementById('sub-name').value.trim();
+  if (!name) return;
+  if (!data.cats[ci].subs) data.cats[ci].subs = [];
+  data.cats[ci].subs.push({ name, links: [] });
+  save(); render(); closeModal('sub');
+}
+
+function addLink() {
+  const ci = document.getElementById('link-cat').value;
+  const si = document.getElementById('link-sub').value;
+  let url = document.getElementById('link-url').value.trim();
+  const title = document.getElementById('link-title').value.trim();
+  if (!url) return;
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  const link = { url, title };
+  if (si === '') { data.cats[ci].links.push(link); }
+  else { data.cats[ci].subs[si].links.push(link); }
+  save(); render(); closeModal('link');
+}
+
+function deleteCat(ci) {
+  if (confirm('Kategorie "' + data.cats[ci].name + '" und alle Links darin löschen?')) {
+    data.cats.splice(ci, 1); save(); render();
+  }
+}
+
+function deleteSub(ci, si) {
+  if (confirm('Unterkategorie "' + data.cats[ci].subs[si].name + '" löschen?')) {
+    data.cats[ci].subs.splice(si, 1); save(); render();
+  }
+}
+
+function deleteCatLink(ci, li) { data.cats[ci].links.splice(li, 1); save(); render(); }
+function deleteSubLink(ci, si, li) { data.cats[ci].subs[si].links.splice(li, 1); save(); render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-bg').forEach(m => m.style.display = 'none');
+});
+
+render();
+</script>
+</body>
+</html>
