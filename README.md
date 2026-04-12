@@ -27,9 +27,9 @@ Diese App wurde von Eva Renacuaja gemeinsam mit [Claude](https://claude.ai) (KI-
 
 ## Technische Voraussetzungen
 
-- Ein kostenloses [Firebase](https://firebase.google.com)-Konto mit einer Realtime Database
-- Ein [GitHub](https://github.com)-Konto mit aktivierten GitHub Pages
-- Ein [Anthropic](https://anthropic.com)-API-Schlüssel für die KI-Korrektur der Spracheingabe
+- Ein kostenloses [Firebase](https://firebase.google.com)-Konto mit einer Realtime Database.
+- Ein [GitHub](https://github.com)-Konto mit aktivierten GitHub Pages.
+- Ein [Anthropic](https://anthropic.com)-API-Schlüssel für die KI-Korrektur der Spracheingabe.
 
 ---
 
