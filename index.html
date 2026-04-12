@@ -355,8 +355,6 @@ function formatDayLabel(key) {
   if (key === offsetKey(today,1)) return { name: 'Morgen', sub: d.toLocaleDateString('de-DE', {day:'numeric',month:'long',year:'numeric'}) };
   return { name: d.toLocaleDateString('de-DE', {weekday:'long'}), sub: d.toLocaleDateString('de-DE', {day:'numeric',month:'long',year:'numeric'}) };
 }
-function dbDayUrl(key) { return DB_ROOT + '/tage/' + key + '.json'; }
-function dbAllUrl() { return DB_ROOT + '/tage.json'; }
 
 // ── Wiederkehrende Aufgaben parsen ────────────────────────────────────────────
 const WOCHENTAGE = { montags:1, dienstags:2, mittwochs:3, donnerstags:4, freitags:5, samstags:6, sonntags:0 };
