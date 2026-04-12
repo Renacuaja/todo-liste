@@ -426,7 +426,6 @@ async function loadAll() {
   try {
     const allUrl  = isLegacy() ? dbAllUrlLegacy()  : dbAllUrl();
     const recurUrl = isLegacy() ? dbRecurLegacy() : dbRecur();
-    alert('loadAll: currentList="' + currentList + '", isLegacy=' + isLegacy() + '\nURL: ' + allUrl);
     const [dRes, rRes] = await Promise.all([fetch(allUrl), fetch(recurUrl)]);
     const dData = await dRes.json();
     const rData = await rRes.json();
@@ -536,7 +535,6 @@ async function checkLogin() {
 }
 
 function showApp() {
-  alert('showApp: currentList = "' + currentList + '", isLegacy = ' + isLegacy());
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app-screen').classList.add('visible');
   document.getElementById('user-badge').textContent = '👤 ' + currentUser;
@@ -630,7 +628,6 @@ async function doLogin() {
       try { 
         const text = await pwRes.text();
         // DEBUG
-        alert('DEBUG:\nURL: ' + configUrl + '\nFirebase Antwort: ' + text + '\nIsLegacy: ' + isLegacy());
         correctPw = text && text !== 'null' ? JSON.parse(text) : null;
       } catch(e) { correctPw = null; }
       
