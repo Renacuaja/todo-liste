@@ -981,6 +981,9 @@ else {
     const recur = parseRecurrence(transcript);
     document.getElementById('sync-indicator').textContent = 'Rohtext: "' + transcript + '" | recur: ' + (recur ? recur.type : 'null');
     document.getElementById('sync-indicator').style.opacity = '1';
+    document.getElementById('sync-indicator').style.fontSize = '0.65rem';
+    document.getElementById('sync-indicator').style.maxWidth = '80vw';
+    document.getElementById('sync-indicator').style.whiteSpace = 'normal';
     if (recur) { addTodo(transcript); return; }
     const corrected = await correctTranscript(transcript);
     addTodo(corrected);
