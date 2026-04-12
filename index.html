@@ -169,9 +169,9 @@
     <label>Listen-Name</label>
     <input type="text" id="login-listname" placeholder="z. B. ZuHause" autocomplete="off">
     <label>Dein Name</label>
-    <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="name">
+    <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="off">
     <label id="login-pw-label">Losungswort</label>
-    <input type="password" id="login-pw" placeholder="••••••••">
+    <input type="password" id="login-pw" placeholder="••••••••" autocomplete="new-password">
     <div id="login-newlist-extra" style="display:none;">
       <label>Losungswort wiederholen</label>
       <input type="password" id="login-pw2" placeholder="••••••••">
@@ -528,8 +528,12 @@ document.getElementById('login-newlist-toggle').addEventListener('click', () => 
 });
 
 async function checkLogin() {
-  const savedList = null;
-  if (savedList) document.getElementById('login-listname').value = savedList;
+  // Felder leeren um Browser-Autofill zu verhindern
+  setTimeout(() => {
+    document.getElementById('login-listname').value = '';
+    document.getElementById('login-name').value = '';
+    document.getElementById('login-pw').value = '';
+  }, 100);
 }
 
 function showApp() {
