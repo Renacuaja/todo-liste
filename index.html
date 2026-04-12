@@ -167,7 +167,7 @@
     <h2>Einfache ToDo-Liste für den Alltag</h2>
     <p id="login-desc">Gib den Listen-Namen und das Losungswort ein, um dich anzumelden.</p>
     <label>Listen-Name</label>
-    <input type="text" id="login-listname" placeholder="z. B. ZuHause" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
+    <input type="text" id="login-listname" placeholder="z. B. Familie" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
     <label>Dein Name</label>
     <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
     <label id="login-pw-label">Losungswort</label>
@@ -180,6 +180,33 @@
     <button id="login-newlist-toggle" style="width:100%;background:none;border:1px solid var(--border);border-radius:10px;padding:0.65rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;cursor:pointer;color:var(--muted);margin-top:8px;">+ Neue Liste erstellen</button>
     <div id="login-error"></div>
     <div id="login-loading">Prüfe Losungswort …</div>
+    <div style="text-align:center;margin-top:1.2rem;">
+      <button id="master-admin-btn" style="background:none;border:none;cursor:pointer;color:var(--border);font-size:0.7rem;font-family:'DM Sans',sans-serif;">⚙</button>
+    </div>
+  </div>
+</div>
+
+<!-- Master-Admin-Modal -->
+<div id="master-modal-bg" style="position:fixed;inset:0;background:rgba(26,24,20,0.45);z-index:300;display:none;align-items:flex-end;justify-content:center;">
+  <div id="master-modal" style="background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:480px;padding:1.2rem 1.2rem 2rem;">
+    <h3 style="font-family:'DM Serif Display',serif;font-size:1.1rem;font-weight:400;margin-bottom:0.3rem;">Master-Admin</h3>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.5;" id="master-desc">Gib das Master-Passwort ein.</p>
+    <div id="master-login-view">
+      <input type="password" id="master-pw-input" placeholder="Master-Passwort …" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem;font-family:'DM Sans',sans-serif;font-size:0.95rem;color:var(--ink);outline:none;margin-bottom:8px;">
+      <button id="master-login-btn" style="width:100%;background:var(--ink);color:white;border:none;border-radius:10px;padding:0.72rem;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:500;cursor:pointer;">Anmelden</button>
+      <div id="master-error" style="color:var(--accent);font-size:0.82rem;margin-top:0.5rem;display:none;"></div>
+    </div>
+    <div id="master-setup-view" style="display:none;">
+      <p style="font-size:0.82rem;color:var(--accent);margin-bottom:0.8rem;">Noch kein Master-Passwort. Lege jetzt eines fest:</p>
+      <input type="password" id="master-setup-pw1" placeholder="Master-Passwort …" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem;font-family:'DM Sans',sans-serif;font-size:0.95rem;color:var(--ink);outline:none;margin-bottom:8px;">
+      <input type="password" id="master-setup-pw2" placeholder="Wiederholen …" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem;font-family:'DM Sans',sans-serif;font-size:0.95rem;color:var(--ink);outline:none;margin-bottom:8px;">
+      <button id="master-setup-btn" style="width:100%;background:var(--ink);color:white;border:none;border-radius:10px;padding:0.72rem;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:500;cursor:pointer;">Speichern</button>
+      <div id="master-setup-error" style="color:var(--accent);font-size:0.82rem;margin-top:0.5rem;display:none;"></div>
+    </div>
+    <div id="master-lists-view" style="display:none;">
+      <div id="master-lists-container"></div>
+    </div>
+    <button id="master-close-btn" style="display:block;width:100%;margin-top:12px;background:none;border:1px solid var(--border);border-radius:10px;padding:0.6rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;cursor:pointer;color:var(--muted);">Schließen</button>
   </div>
 </div>
 
@@ -1059,7 +1086,115 @@ document.getElementById('settings-save-btn').addEventListener('click', async () 
   } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
 });
 
-// ── Firebase Regeln Hinweis ───────────────────────────────────────────────────
+// ── Master-Admin ──────────────────────────────────────────────────────────────
+const DB_MASTER_PW = DB_ROOT + '/master/passwort.json';
+const DB_LISTEN_ROOT = DB_ROOT + '/listen.json';
+
+document.getElementById('master-admin-btn').addEventListener('click', async () => {
+  const bg = document.getElementById('master-modal-bg');
+  bg.style.display = 'flex';
+  document.getElementById('master-login-view').style.display = 'block';
+  document.getElementById('master-setup-view').style.display = 'none';
+  document.getElementById('master-lists-view').style.display = 'none';
+  document.getElementById('master-error').style.display = 'none';
+  document.getElementById('master-pw-input').value = '';
+  // Prüfen ob Master-PW bereits gesetzt
+  try {
+    const r = await fetch(DB_MASTER_PW);
+    const text = await r.text();
+    if (!text || text === 'null') {
+      document.getElementById('master-login-view').style.display = 'none';
+      document.getElementById('master-setup-view').style.display = 'block';
+      document.getElementById('master-desc').textContent = 'Einmalige Einrichtung des Master-Passworts.';
+    }
+  } catch(e) {}
+});
+
+document.getElementById('master-close-btn').addEventListener('click', () => {
+  document.getElementById('master-modal-bg').style.display = 'none';
+});
+document.getElementById('master-modal-bg').addEventListener('click', e => {
+  if (e.target === document.getElementById('master-modal-bg'))
+    document.getElementById('master-modal-bg').style.display = 'none';
+});
+
+document.getElementById('master-setup-btn').addEventListener('click', async () => {
+  const pw1 = document.getElementById('master-setup-pw1').value;
+  const pw2 = document.getElementById('master-setup-pw2').value;
+  const err = document.getElementById('master-setup-error');
+  err.style.display = 'none';
+  if (!pw1) { err.textContent = 'Bitte ein Passwort eingeben.'; err.style.display = 'block'; return; }
+  if (pw1 !== pw2) { err.textContent = 'Passwörter stimmen nicht überein.'; err.style.display = 'block'; return; }
+  const hash = await sha256(pw1);
+  await fetch(DB_MASTER_PW, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(hash) });
+  document.getElementById('master-setup-view').style.display = 'none';
+  document.getElementById('master-login-view').style.display = 'block';
+  document.getElementById('master-desc').textContent = 'Master-Passwort gesetzt. Bitte anmelden.';
+});
+
+document.getElementById('master-login-btn').addEventListener('click', async () => {
+  const pw = document.getElementById('master-pw-input').value;
+  const err = document.getElementById('master-error');
+  err.style.display = 'none';
+  if (!pw) { err.textContent = 'Bitte Passwort eingeben.'; err.style.display = 'block'; return; }
+  try {
+    const [hashRes, enteredHash] = await Promise.all([
+      fetch(DB_MASTER_PW).then(r => r.json()),
+      sha256(pw)
+    ]);
+    if (enteredHash !== hashRes) { err.textContent = 'Falsches Passwort.'; err.style.display = 'block'; return; }
+    // Eingeloggt — Listen laden
+    document.getElementById('master-login-view').style.display = 'none';
+    document.getElementById('master-lists-view').style.display = 'block';
+    document.getElementById('master-desc').textContent = 'Alle vorhandenen Listen:';
+    await loadMasterLists();
+  } catch(e) { err.textContent = 'Verbindungsfehler.'; err.style.display = 'block'; }
+});
+document.getElementById('master-pw-input').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('master-login-btn').click(); });
+
+async function loadMasterLists() {
+  const container = document.getElementById('master-lists-container');
+  container.innerHTML = '<p style="font-size:0.82rem;color:var(--muted);">Lade Listen …</p>';
+  try {
+    const r = await fetch(DB_LISTEN_ROOT);
+    const data = await r.json();
+    if (!data || typeof data !== 'object') {
+      container.innerHTML = '<p style="font-size:0.82rem;color:var(--muted);">Keine Listen vorhanden.</p>';
+      return;
+    }
+    const lists = Object.keys(data);
+    if (!lists.length) {
+      container.innerHTML = '<p style="font-size:0.82rem;color:var(--muted);">Keine Listen vorhanden.</p>';
+      return;
+    }
+    container.innerHTML = lists.map(name => {
+      // Letzte Aktivität ermitteln
+      const tage = data[name]?.tage;
+      let lastActive = '—';
+      if (tage && typeof tage === 'object') {
+        const keys = Object.keys(tage).sort().reverse();
+        if (keys.length) lastActive = keys[0];
+      }
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border);">
+        <div>
+          <div style="font-size:0.9rem;font-weight:500;">${name}</div>
+          <div style="font-size:0.72rem;color:var(--muted);">Letzte Aktivität: ${lastActive}</div>
+        </div>
+        <button data-list="${name}" class="master-del-btn" style="background:none;border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;color:var(--accent);">Löschen</button>
+      </div>`;
+    }).join('');
+    container.querySelectorAll('.master-del-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const name = btn.dataset.list;
+        if (!confirm('Liste "' + name + '" wirklich löschen? Das kann nicht rückgängig gemacht werden.')) return;
+        await fetch(DB_ROOT + '/listen/' + name + '.json', { method:'DELETE' });
+        await loadMasterLists();
+      });
+    });
+  } catch(e) {
+    container.innerHTML = '<p style="font-size:0.82rem;color:var(--accent);">Fehler beim Laden.</p>';
+  }
+}
 // Benötigt in Firebase unter "rules":
 // "listen": { ".read": true, ".write": true }
 // "tage": { ".read": true, ".write": true }        (Legacy ZuHause)
