@@ -167,11 +167,11 @@
     <h2>Einfache ToDo-Liste für den Alltag</h2>
     <p id="login-desc">Gib den Listen-Namen und das Losungswort ein, um dich anzumelden.</p>
     <label>Listen-Name</label>
-    <input type="text" id="login-listname" placeholder="z. B. ZuHause" autocomplete="off">
+    <input type="text" id="login-listname" placeholder="z. B. ZuHause" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
     <label>Dein Name</label>
-    <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="off">
+    <input type="text" id="login-name" placeholder="z. B. Maria" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
     <label id="login-pw-label">Losungswort</label>
-    <input type="password" id="login-pw" placeholder="••••••••" autocomplete="new-password">
+    <input type="password" id="login-pw" placeholder="••••••••" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
     <div id="login-newlist-extra" style="display:none;">
       <label>Losungswort wiederholen</label>
       <input type="password" id="login-pw2" placeholder="••••••••">
