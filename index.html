@@ -428,6 +428,7 @@ async function loadAll() {
   try {
     const allUrl  = isLegacy() ? dbAllUrlLegacy()  : dbAllUrl();
     const recurUrl = isLegacy() ? dbRecurLegacy() : dbRecur();
+    alert('loadAll: currentList="' + currentList + '", isLegacy=' + isLegacy() + '\nURL: ' + allUrl);
     const [dRes, rRes] = await Promise.all([fetch(allUrl), fetch(recurUrl)]);
     const dData = await dRes.json();
     const rData = await rRes.json();
