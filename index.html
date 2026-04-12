@@ -979,11 +979,9 @@ else {
       return match;
     });
     const recur = parseRecurrence(transcript);
-    document.getElementById('sync-indicator').textContent = 'Rohtext: "' + transcript + '" | recur: ' + (recur ? recur.type : 'null');
-    document.getElementById('sync-indicator').style.opacity = '1';
-    document.getElementById('sync-indicator').style.fontSize = '0.65rem';
-    document.getElementById('sync-indicator').style.maxWidth = '80vw';
-    document.getElementById('sync-indicator').style.whiteSpace = 'normal';
+    let dbg = document.getElementById('debug-banner');
+    if (!dbg) { dbg = document.createElement('div'); dbg.id='debug-banner'; dbg.style.cssText='position:fixed;top:60px;left:0;right:0;background:#333;color:white;padding:8px 12px;font-size:12px;z-index:999;word-break:break-all;'; document.body.appendChild(dbg); }
+    dbg.textContent = 'Erkannt: "' + transcript + '" → recur: ' + (recur ? recur.type : 'null');
     if (recur) { addTodo(transcript); return; }
     const corrected = await correctTranscript(transcript);
     addTodo(corrected);
