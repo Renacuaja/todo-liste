@@ -163,7 +163,7 @@
 <body>
 
 <div id="login-screen">
-  <div class="login-card">
+  <div class="login-card" onsubmit="return false;">
     <h2>Einfache ToDo-Liste für den Alltag</h2>
     <p id="login-desc">Gib den Listen-Namen und das Losungswort ein, um dich anzumelden.</p>
     <label>Listen-Name</label>
@@ -568,8 +568,6 @@ function showApp() {
 }
 
 document.getElementById('login-btn').addEventListener('click', doLogin);
-document.getElementById('login-pw').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
-document.getElementById('login-name').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('login-pw').focus(); });
 document.getElementById('login-listname').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('login-name').focus(); });
 
 async function doLogin() {
